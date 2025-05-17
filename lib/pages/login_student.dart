@@ -173,7 +173,7 @@ class StudentLoginPage extends StatelessWidget {
                                           padding: EdgeInsets.all(15),
                                         ),
                                         child: Text(
-                                          'SIGN UP',
+                                          'RETURN',
                                           style: GoogleFonts.poppins(
                                             textStyle: TextStyle(
                                               fontSize: 20,
