@@ -65,6 +65,9 @@ flutter:
     - assets/mascot-teacher.png
     - assets/student-onboarding.png
     - assets/teacher-onboarding.png
+    - assets/logo-small.png
+    - assets/differentiation-bg.png
+    - assets/algebra-bg.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
