@@ -9,9 +9,15 @@ import 'package:cheez_quiz_app/pages/result_bad_student.dart';
 import 'package:cheez_quiz_app/pages/result_good_student.dart';
 import 'package:cheez_quiz_app/pages/quiz_success_page.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
-  runApp(const CheezQuizApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(CheezQuizApp());
 }
 
 class CheezQuizApp extends StatelessWidget {

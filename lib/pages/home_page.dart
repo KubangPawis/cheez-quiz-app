@@ -1,11 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'login_student.dart'; // ← Make sure you import your pages
+import 'login_teacher.dart';
 
 const primaryColor = 0xFFFFCC00;
 const strokeColor = 0xFF6C6C6C;
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
+
+  void _navigateToRole(BuildContext context, String role) {
+    if (role == 'student') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const StudentLoginPage()),
+      );
+    } else if (role == 'teacher') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const TeacherLoginPage()),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,8 +35,13 @@ class HomePage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('CheezQuiz',
-                    style: titleStyle(textColor: Color(primaryColor), fontSize: 48)),
+                Text(
+                  'CheezQuiz',
+                  style: titleStyle(
+                    textColor: const Color(primaryColor),
+                    fontSize: 48,
+                  ),
+                ),
                 Image.asset(
                   'assets/cheese-icon.png',
                   width: 120,
@@ -28,13 +49,15 @@ class HomePage extends StatelessWidget {
                 ),
               ],
             ),
-
-            SizedBox(height: 30),
-
-            /* WHAT ARE YOU? */
-            Text('WHAT ARE YOU?', style: titleStyle(textColor: Colors.black, fontSize: 20)),
-
-            SizedBox(height: 60),
+            const SizedBox(height: 30),
+            Text(
+              'WHAT ARE YOU?',
+              style: titleStyle(
+                textColor: Colors.black,
+                fontSize: 20,
+              ),
+            ),
+            const SizedBox(height: 60),
 
             /* CHOICES */
             Wrap(
@@ -42,67 +65,72 @@ class HomePage extends StatelessWidget {
               spacing: 80,
               runSpacing: 30,
               children: [
-                
-                /* STUDENT OPTION */
-                Container(
-                  width: 500,
-                  height: 600,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.black,
-                      width: 1,
+                // STUDENT
+                GestureDetector(
+                  onTap: () => _navigateToRole(context, 'student'),
+                  child: Container(
+                    width: 500,
+                    height: 600,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black, width: 1),
+                      borderRadius: BorderRadius.circular(15),
                     ),
-                    borderRadius: BorderRadius.circular(15),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/student-onboarding.png',
+                            width: 250,
+                            height: 340,
+                          ),
+                          const SizedBox(height: 30),
+                          Text(
+                            'Student',
+                            style: subtitleStyle(
+                              textColor: Colors.black,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset(
-                          'assets/student-onboarding.png',
-                          width: 250,
-                          height: 340,
-                        ),
-
-                        SizedBox(height: 30),
-
-                        Text('Student',
-                            style: subtitleStyle(textColor: Colors.black, fontSize: 20)),
-                      ],
-                    ),
-                  )
                 ),
 
-                /* TEACHER OPTION */
-                Container(
-                  width: 500,
-                  height: 600,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.black,
-                      width: 1,
+                // TEACHER
+                GestureDetector(
+                  onTap: () => _navigateToRole(context, 'teacher'),
+                  child: Container(
+                    width: 500,
+                    height: 600,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black, width: 1),
+                      borderRadius: BorderRadius.circular(15),
                     ),
-                    borderRadius: BorderRadius.circular(15),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/teacher-onboarding.png',
+                            width: 250,
+                            height: 340,
+                          ),
+                          const SizedBox(height: 30),
+                          Text(
+                            'Teacher',
+                            style: subtitleStyle(
+                              textColor: Colors.black,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset(
-                          'assets/teacher-onboarding.png',
-                          width: 250,
-                          height: 340,
-                        ),
-
-                        SizedBox(height: 30),
-
-                        Text('Teacher',
-                            style: subtitleStyle(textColor: Colors.black, fontSize: 20)),
-                      ],
-                    ),
-                  )
                 ),
               ],
             ),
@@ -116,16 +144,18 @@ class HomePage extends StatelessWidget {
 TextStyle titleStyle({required Color textColor, required double? fontSize}) {
   return GoogleFonts.poppins(
     textStyle: TextStyle(
-    fontSize: fontSize,
-    fontWeight: FontWeight.bold,
-    color: textColor,
-    ));
+      fontSize: fontSize,
+      fontWeight: FontWeight.bold,
+      color: textColor,
+    ),
+  );
 }
 
 TextStyle subtitleStyle({required Color textColor, required double? fontSize}) {
   return GoogleFonts.poppins(
     textStyle: TextStyle(
-    fontSize: fontSize,
-    color: textColor,
-    ));
+      fontSize: fontSize,
+      color: textColor,
+    ),
+  );
 }

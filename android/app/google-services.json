@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "14997023652",
+    "project_id": "cheesequiz-af7c2",
+    "storage_bucket": "cheesequiz-af7c2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:14997023652:android:658de1f0aed95f3c62af31",
+        "android_client_info": {
+          "package_name": "com.example.cheez_quiz_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDvP9nQGRKOIfBxxt15gteD9gc7dzhMy4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
