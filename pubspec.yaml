@@ -62,6 +62,7 @@ flutter:
   assets:
     - assets/cheese-icon.png
     - assets/mascot-happy.jpg
+    - assets/mascot-sad.png
     - assets/mascot-teacher.png
     - assets/student-onboarding.png
     - assets/teacher-onboarding.png
