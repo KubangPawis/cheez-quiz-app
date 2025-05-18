@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'creation.dart'; // Make sure this path is correct
 
 const primaryColor = 0xFFFFCC00;
 const strokeColor = 0xFF6C6C6C;
@@ -17,6 +20,7 @@ class TeacherMainPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Header
               Center(
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -24,7 +28,7 @@ class TeacherMainPage extends StatelessWidget {
                     Text(
                       'CheezQuiz',
                       style: titleStyle(
-                        textColor: Color(primaryColor),
+                        textColor: const Color(primaryColor),
                         fontSize: 32,
                       ),
                     ),
@@ -47,9 +51,9 @@ class TeacherMainPage extends StatelessWidget {
                   ),
                 ),
               ),
-
               const SizedBox(height: 32),
 
+              // Greeting
               Text(
                 'Hi, Joe!',
                 style: titleStyle(
@@ -65,25 +69,70 @@ class TeacherMainPage extends StatelessWidget {
                   fontSize: 16,
                 ),
               ),
-
               const SizedBox(height: 24),
 
-              QuizCard(
-                title: 'Rules of Differentiation',
-                subtitle: 'Prelims',
-                itemsCount: '5 Items',
-                imagePath: 'assets/differentiation-bg.png',
+              // Quiz list from Firestore
+              Expanded(
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('quizzes')
+                      // .where('createdBy', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+                      .orderBy('createdAt', descending: true)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return const Center(child: Text('No quizzes yet'));
+                    }
+
+                    final quizzes = snapshot.data!.docs;
+
+                    return ListView.separated(
+                      itemCount: quizzes.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 16),
+                      itemBuilder: (context, index) {
+                        final quiz = quizzes[index];
+                        final quizId = quiz.id;
+                        final title = quiz['title'] ?? 'Untitled';
+
+                        return FutureBuilder<QuerySnapshot>(
+                          future: FirebaseFirestore.instance
+                              .collection('quizzes')
+                              .doc(quizId)
+                              .collection('questions')
+                              .get(),
+                          builder: (context, qSnap) {
+                            final count = qSnap.data?.docs.length ?? 0;
+                            return QuizCard(
+                              title: title,
+                              subtitle: 'Prelims',
+                              itemsCount: '$count Items',
+                              imagePath: 'assets/cheese-icon.png',
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
-              const SizedBox(height: 16),
-              QuizCard(
-                title: 'Basics of Algebra',
-                subtitle: 'Prelims',
-                itemsCount: '5 Items',
-                imagePath: 'assets/algebra-bg.png',
-              ),
+
               const SizedBox(height: 16),
 
-              const AddQuizCard(),
+              // Add New Quiz Button
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TeacherQuestionPage(),
+                    ),
+                  );
+                },
+                child: const AddQuizCard(),
+              ),
             ],
           ),
         ),
@@ -111,7 +160,7 @@ class QuizCard extends StatelessWidget {
     return Container(
       height: 120,
       decoration: BoxDecoration(
-        border: Border.all(color: Color(strokeColor)),
+        border: Border.all(color: const Color(strokeColor)),
         borderRadius: BorderRadius.circular(12),
         image: DecorationImage(
           image: AssetImage(imagePath),
@@ -173,7 +222,7 @@ class AddQuizCard extends StatelessWidget {
     return Container(
       height: 120,
       decoration: BoxDecoration(
-        border: Border.all(color: Color(strokeColor)),
+        border: Border.all(color: const Color(strokeColor)),
         borderRadius: BorderRadius.circular(12),
       ),
       child: const Center(
