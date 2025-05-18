@@ -7,7 +7,6 @@ const strokeColor = 0xFF6C6C6C;
 class QuizMultiplePage extends StatefulWidget {
   final int questionIndex;
   final int totalQuestions;
-
   const QuizMultiplePage({
     Key? key,
     this.questionIndex = 1,
@@ -19,49 +18,29 @@ class QuizMultiplePage extends StatefulWidget {
 }
 
 class _QuizMultiplePageState extends State<QuizMultiplePage> {
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController _questionCtrl,
-      _choiceA,
-      _choiceB,
-      _choiceC,
-      _choiceD;
+  int? _selectedIndex;
 
-  @override
-  void initState() {
-    super.initState();
-    _questionCtrl = TextEditingController();
-    _choiceA = TextEditingController();
-    _choiceB = TextEditingController();
-    _choiceC = TextEditingController();
-    _choiceD = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _questionCtrl.dispose();
-    _choiceA.dispose();
-    _choiceB.dispose();
-    _choiceC.dispose();
-    _choiceD.dispose();
-    super.dispose();
-  }
+  // your static data for now; you can pull these from args or your model later
+  final List<String> _labels = ['A.', 'B.', 'C.', 'D.'];
+  final List<String> _choices = ['7', 'x', '12', '3.5'];
 
   @override
   Widget build(BuildContext context) {
+    const double maxWidth = 900;
+    const double gap = 16;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
-          // 1) Center everything
           child: ConstrainedBox(
-            // 2) Constrain the width
-            constraints: const BoxConstraints(maxWidth: 900),
+            constraints: const BoxConstraints(maxWidth: maxWidth),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // --- HEADER (same as before) ---
+                  // ─── HEADER ────────────────────────────────
                   Center(
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -69,9 +48,7 @@ class _QuizMultiplePageState extends State<QuizMultiplePage> {
                         Text(
                           'CheezQuiz',
                           style: titleStyle(
-                            textColor: Color(primaryColor),
-                            fontSize: 32,
-                          ),
+                              textColor: Color(primaryColor), fontSize: 32),
                         ),
                         const SizedBox(width: 8),
                         Image.asset(
@@ -85,14 +62,14 @@ class _QuizMultiplePageState extends State<QuizMultiplePage> {
                   const SizedBox(height: 4),
                   Center(
                     child: Text(
-                      'TEACHER',
+                      'STUDENT',
                       style: titleStyle(textColor: Colors.black, fontSize: 16),
                     ),
                   ),
 
                   const SizedBox(height: 32),
 
-                  // --- QUESTION LABELS ---
+                  // ─── QUESTION LABELS ───────────────────────
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
@@ -106,46 +83,34 @@ class _QuizMultiplePageState extends State<QuizMultiplePage> {
                     child: Text(
                       'Which of the following is a variable?',
                       style: subtitleStyle(
-                        textColor: Colors.black,
-                        fontSize: 16,
-                      ),
+                          textColor: Colors.black, fontSize: 16),
                     ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // --- CHOICES LABEL ---
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Choices:',
-                      style: titleStyle(textColor: Colors.black, fontSize: 18),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // --- TWO ROWS OF TWO FIELDS ---
-                  Row(
-                    children: [
-                      Text('A. 7'),
-                      const SizedBox(width: 16),
-                      Text('C. 12'),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Text('B. x'),
-                      const SizedBox(width: 16),
-                      Text('D. 3.5'),
-                    ],
                   ),
 
                   const SizedBox(height: 24),
 
+                  // ─── CHOICES ───────────────────────────────
+                  Row(
+                    children: [
+                      _buildChoiceButton(0),
+                      SizedBox(width: gap),
+                      _buildChoiceButton(2),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      _buildChoiceButton(1),
+                      SizedBox(width: gap),
+                      _buildChoiceButton(3),
+                    ],
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // ─── NEXT & RETURN ─────────────────────────
                   SizedBox(
                     height: 48,
-                    width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(primaryColor),
@@ -153,7 +118,11 @@ class _QuizMultiplePageState extends State<QuizMultiplePage> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      onPressed: () {},
+                      onPressed: _selectedIndex != null
+                          ? () {
+                              // TODO: lock in answer & navigate
+                            }
+                          : null, // disabled if none selected
                       child: Text(
                         'NEXT',
                         style: titleStyle(
@@ -166,10 +135,9 @@ class _QuizMultiplePageState extends State<QuizMultiplePage> {
                   const SizedBox(height: 8),
                   SizedBox(
                     height: 48,
-                    width: double.infinity,
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Color(strokeColor)),
+                        side: const BorderSide(color: Color(strokeColor)),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -178,9 +146,7 @@ class _QuizMultiplePageState extends State<QuizMultiplePage> {
                       child: Text(
                         'RETURN',
                         style: subtitleStyle(
-                          textColor: Colors.black,
-                          fontSize: 16,
-                        ),
+                            textColor: Colors.black, fontSize: 16),
                       ),
                     ),
                   ),
@@ -193,23 +159,65 @@ class _QuizMultiplePageState extends State<QuizMultiplePage> {
     );
   }
 
-  // reuse your text styles:
-  TextStyle titleStyle({required Color textColor, required double? fontSize}) {
-    return GoogleFonts.poppins(
-      textStyle: TextStyle(
-        fontSize: fontSize,
-        fontWeight: FontWeight.bold,
-        color: textColor,
+  Widget _buildChoiceButton(int index) {
+    final bool isSelected = _selectedIndex == index;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            // toggle selection
+            _selectedIndex = (isSelected ? null : index);
+          });
+        },
+        child: Container(
+          height: 60,
+          decoration: BoxDecoration(
+            color: isSelected
+                ? Color(primaryColor).withOpacity(0.4)
+                : Colors.white,
+            border: Border.all(color: Color(strokeColor)),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          alignment: Alignment.centerLeft,
+          child: RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: '${_labels[index]} ',
+                  style: titleStyle(
+                      textColor: Colors.black, fontSize: 16),
+                ),
+                TextSpan(
+                  text: _choices[index],
+                  style: subtitleStyle(
+                      textColor: Colors.black, fontSize: 16),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
+}
 
-  TextStyle subtitleStyle({
-    required Color textColor,
-    required double? fontSize,
-  }) {
-    return GoogleFonts.poppins(
-      textStyle: TextStyle(fontSize: fontSize, color: textColor),
-    );
-  }
+/// Reusable Poppins text styles
+TextStyle titleStyle({required Color textColor, required double? fontSize}) {
+  return GoogleFonts.poppins(
+    textStyle: TextStyle(
+      fontSize: fontSize,
+      fontWeight: FontWeight.bold,
+      color: textColor,
+    ),
+  );
+}
+
+TextStyle subtitleStyle({required Color textColor, required double? fontSize}) {
+  return GoogleFonts.poppins(
+    textStyle: TextStyle(
+      fontSize: fontSize,
+      color: textColor,
+    ),
+  );
 }
