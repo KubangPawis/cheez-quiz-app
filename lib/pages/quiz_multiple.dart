@@ -4,21 +4,21 @@ import 'package:google_fonts/google_fonts.dart';
 const primaryColor = 0xFFFFCC00;
 const strokeColor = 0xFF6C6C6C;
 
-class TeacherQuestionPage extends StatefulWidget {
+class QuizMultiplePage extends StatefulWidget {
   final int questionIndex;
   final int totalQuestions;
 
-  const TeacherQuestionPage({
+  const QuizMultiplePage({
     Key? key,
     this.questionIndex = 1,
     this.totalQuestions = 5,
   }) : super(key: key);
 
   @override
-  _TeacherQuestionPageState createState() => _TeacherQuestionPageState();
+  _QuizMultiplePageState createState() => _QuizMultiplePageState();
 }
 
-class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
+class _QuizMultiplePageState extends State<QuizMultiplePage> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _questionCtrl,
       _choiceA,
@@ -48,36 +48,6 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
 
   @override
   Widget build(BuildContext context) {
-    const double gutter = 24;
-    const double interField = 16;
-
-    Widget choiceField(
-      String label,
-      TextEditingController ctrl,
-      String hintText,
-    ) => Expanded(
-      child: TextFormField(
-        controller: ctrl,
-        decoration: InputDecoration(
-          hintText: hintText,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Color(strokeColor)),
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 14,
-          ),
-          prefix: Text(
-            '$label  ',
-            style: titleStyle(textColor: Colors.black, fontSize: 16),
-          ),
-        ),
-        validator:
-            (v) => v == null || v.isEmpty ? 'Please enter a choice' : null,
-      ),
-    );
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -134,7 +104,7 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'Fill up the following fields.',
+                      'Which of the following is a variable?',
                       style: subtitleStyle(
                         textColor: Colors.black,
                         fontSize: 16,
@@ -143,30 +113,6 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
                   ),
 
                   const SizedBox(height: 16),
-
-                  // --- QUESTION BOX ---
-                  Form(
-                    key: _formKey,
-                    child: TextFormField(
-                      controller: _questionCtrl,
-                      maxLines: 4,
-                      decoration: InputDecoration(
-                        hintText: 'Write your question…',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Color(strokeColor)),
-                        ),
-                        contentPadding: const EdgeInsets.all(16),
-                      ),
-                      validator:
-                          (v) =>
-                              (v ?? '').isEmpty
-                                  ? 'Please enter a question'
-                                  : null,
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
 
                   // --- CHOICES LABEL ---
                   Align(
@@ -181,23 +127,22 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
                   // --- TWO ROWS OF TWO FIELDS ---
                   Row(
                     children: [
-                      choiceField('A.', _choiceA, 'Write Choice A'),
+                      Text('A. 7'),
                       const SizedBox(width: 16),
-                      choiceField('C.', _choiceC, 'Write Choice C'),
+                      Text('C. 12'),
                     ],
                   ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      choiceField('B.', _choiceB, 'Write Choice B'),
+                      Text('B. x'),
                       const SizedBox(width: 16),
-                      choiceField('D.', _choiceD, 'Write Choice D'),
+                      Text('D. 3.5'),
                     ],
                   ),
 
                   const SizedBox(height: 24),
 
-                  // --- BUTTONS (fill the constrained width) ---
                   SizedBox(
                     height: 48,
                     width: double.infinity,
@@ -208,11 +153,7 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          // TODO: next logic
-                        }
-                      },
+                      onPressed: () {},
                       child: Text(
                         'NEXT',
                         style: titleStyle(
@@ -269,34 +210,6 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
   }) {
     return GoogleFonts.poppins(
       textStyle: TextStyle(fontSize: fontSize, color: textColor),
-    );
-  }
-
-  Widget choiceField(
-    String label,
-    TextEditingController ctrl,
-    String hintText,
-  ) {
-    return Expanded(
-      child: TextFormField(
-        controller: ctrl,
-        decoration: InputDecoration(
-          hintText: hintText,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Color(strokeColor)),
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 14,
-          ),
-          prefix: Text(
-            '$label  ',
-            style: titleStyle(textColor: Colors.black, fontSize: 16),
-          ),
-        ),
-        validator: (v) => (v ?? '').isEmpty ? 'Please enter a choice' : null,
-      ),
     );
   }
 }
