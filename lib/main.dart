@@ -15,7 +15,12 @@ class CheezQuizApp extends StatelessWidget {
     return MaterialApp(
       title: 'Cheez Quiz',
       debugShowCheckedModeBanner: false,
-      home: TeacherLoginPage(),
+      initialRoute: '/login_teacher',
+      routes: {
+        '/home': (context) => const HomePage(),
+        '/login_teacher': (context) => const TeacherLoginPage(),
+        '/login_student': (context) => const StudentLoginPage(),
+      }
     );
   }
 }
