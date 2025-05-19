@@ -119,18 +119,22 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
 
   @override
   Widget build(BuildContext context) {
+    const maxWidth = 900.0;
+    const gap = 16.0;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 900),
+            constraints: const BoxConstraints(maxWidth: maxWidth),
             child: Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // HEADER
                   Center(
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -154,6 +158,10 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
                             textColor: Colors.black, fontSize: 16)),
                   ),
                   const SizedBox(height: 32),
+
+                  // QUESTION INDEX
+
+                  // QUESTION INDEX
                   Text(
                     'Question ${widget.questionIndex} / ${widget.totalQuestions}',
                     style:
@@ -164,41 +172,44 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
                       style: subtitleStyle(
                           textColor: Colors.black, fontSize: 16)),
                   const SizedBox(height: 16),
+
+                  // FORM
                   Form(
                     key: _formKey,
-                    child: TextFormField(
-                      controller: _questionCtrl,
-                      maxLines: 4,
-                      decoration: InputDecoration(
-                        hintText: 'Write your question…',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(
-                              color: Color(strokeColor)),
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: _questionCtrl,
+                          maxLines: 4,
+                          decoration: InputDecoration(
+                            hintText: 'Write your question…',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: Color(strokeColor)),
+                            ),
+                            contentPadding: const EdgeInsets.all(16),
+                          ),
+                          validator: (v) => (v ?? '').isEmpty ? 'Please enter a question' : null,
                         ),
-                        contentPadding: const EdgeInsets.all(16),
-                      ),
-                      validator: (v) => (v ?? '').isEmpty
-                          ? 'Please enter a question'
-                          : null,
+                        const SizedBox(height: 24),
+
+                        Text('Choices:', style: titleStyle(textColor: Colors.black, fontSize: 18)),
+                        const SizedBox(height: 12),
+
+                        Row(children: [
+                          choiceField('A.', _choiceA, 'Write Choice A'),
+                          const SizedBox(width: 16),
+                          choiceField('C.', _choiceC, 'Write Choice C'),
+                        ]),
+                        const SizedBox(height: 12),
+                        Row(children: [
+                          choiceField('B.', _choiceB, 'Write Choice B'),
+                          const SizedBox(width: 16),
+                          choiceField('D.', _choiceD, 'Write Choice D'),
+                        ]),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  Text('Choices:',
-                      style: titleStyle(
-                          textColor: Colors.black, fontSize: 18)),
-                  const SizedBox(height: 12),
-                  Row(children: [
-                    choiceField('A.', _choiceA, 'Write Choice A'),
-                    const SizedBox(width: 16),
-                    choiceField('C.', _choiceC, 'Write Choice C'),
-                  ]),
-                  const SizedBox(height: 12),
-                  Row(children: [
-                    choiceField('B.', _choiceB, 'Write Choice B'),
-                    const SizedBox(width: 16),
-                    choiceField('D.', _choiceD, 'Write Choice D'),
-                  ]),
 
                   const SizedBox(height: 24),
                   Text(
@@ -267,8 +278,8 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
       {required Color textColor, required double? fontSize}) {
     return GoogleFonts.poppins(
       textStyle: TextStyle(
-          fontSize: fontSize,
-          fontWeight: FontWeight.bold,
+        fontSize: fontSize,
+        fontWeight: FontWeight.bold,
           color: textColor),
     );
   }
