@@ -7,12 +7,9 @@ const primaryColor = 0xFFFFCC00;
 const strokeColor = 0xFF6C6C6C;
 
 class TeacherQuestionPage extends StatefulWidget {
-  final int questionIndex;
   final int totalQuestions;
-
   const TeacherQuestionPage({
     Key? key,
-    this.questionIndex = 1,
     this.totalQuestions = 5,
   }) : super(key: key);
 
@@ -33,10 +30,12 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
 
   bool _isMultipleChoice = true;
   static String? _quizId;
+  late int _currentIndex;
 
   @override
   void initState() {
     super.initState();
+    _currentIndex = 1; // start at question #1
     _questionCtrl = TextEditingController();
     _choiceA = TextEditingController();
     _choiceB = TextEditingController();
@@ -54,7 +53,15 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
     super.dispose();
   }
 
-  void _saveQuestion() async {
+  void _clearAllFields() {
+    _questionCtrl.clear();
+    _choiceA.clear();
+    _choiceB.clear();
+    _choiceC.clear();
+    _choiceD.clear();
+  }
+
+  Future<void> _saveQuestion() async {
     if (!_formKey.currentState!.validate()) return;
 
     final user = _auth.currentUser;
@@ -78,9 +85,12 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
 
     const correctAnswer = 'A';
 
+    // ensure quiz exists
     if (_quizId == null) {
       _quizId = await _firestore.createQuiz('Untitled Quiz', user.uid);
     }
+
+    // write question
     await _firestore.addQuestion(
       quizId: _quizId!,
       question: question,
@@ -88,18 +98,14 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
       correctAnswer: correctAnswer,
     );
 
-    // next / finish
-    if (widget.questionIndex < widget.totalQuestions) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => TeacherQuestionPage(
-            questionIndex: widget.questionIndex + 1,
-            totalQuestions: widget.totalQuestions,
-          ),
-        ),
-      );
+    // move to next or finish
+    if (_currentIndex < widget.totalQuestions) {
+      setState(() {
+        _currentIndex++;
+        _clearAllFields();
+      });
     } else {
+      // all done
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('All questions saved!')),
       );
@@ -120,7 +126,8 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
           ),
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-          prefix: Text('$label  ', style: titleStyle(textColor: Colors.black, fontSize: 16)),
+          prefix: Text('$label  ',
+              style: titleStyle(textColor: Colors.black, fontSize: 16)),
         ),
         validator: (v) {
           if (!_isMultipleChoice) return null;
@@ -146,43 +153,39 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // ── HEADER ─────────────────────────────
+                  // HEADER
                   Center(
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          'CheezQuiz',
-                          style:
-                              titleStyle(textColor: Color(primaryColor), fontSize: 32),
-                        ),
+                        Text('CheezQuiz',
+                            style: titleStyle(
+                                textColor: Color(primaryColor), fontSize: 32)),
                         const SizedBox(width: 8),
-                        Image.asset('assets/cheese-icon.png', width: 32, height: 32),
+                        Image.asset('assets/cheese-icon.png',
+                            width: 32, height: 32),
                       ],
                     ),
                   ),
                   const SizedBox(height: 4),
                   Center(
-                    child:
-                        Text('TEACHER', style: titleStyle(textColor: Colors.black, fontSize: 16)),
-                  ),
-
+                      child: Text('TEACHER',
+                          style: titleStyle(
+                              textColor: Colors.black, fontSize: 16))),
                   const SizedBox(height: 32),
 
-                  // ── QUESTION INDEX & INSTRUCTION ────────
+                  // QUESTION COUNTER
                   Text(
-                    'Question ${widget.questionIndex} / ${widget.totalQuestions}',
+                    'Question $_currentIndex / ${widget.totalQuestions}',
                     style: titleStyle(textColor: Colors.black, fontSize: 24),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    'Fill up the following fields.',
-                    style: subtitleStyle(textColor: Colors.black, fontSize: 16),
-                  ),
-
+                  Text('Fill up the following fields.',
+                      style: subtitleStyle(
+                          textColor: Colors.black, fontSize: 16)),
                   const SizedBox(height: 16),
 
-                  // ── TYPE TOGGLE ────────────────────────
+                  // TYPE TOGGLE
                   Center(
                     child: ToggleButtons(
                       isSelected: [_isMultipleChoice, !_isMultipleChoice],
@@ -197,12 +200,14 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text('Multiple Choice',
-                              style: subtitleStyle(textColor: Colors.black, fontSize: 14)),
+                              style: subtitleStyle(
+                                  textColor: Colors.black, fontSize: 14)),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text('Freeform',
-                              style: subtitleStyle(textColor: Colors.black, fontSize: 14)),
+                              style: subtitleStyle(
+                                  textColor: Colors.black, fontSize: 14)),
                         ),
                       ],
                     ),
@@ -210,7 +215,7 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
 
                   const SizedBox(height: 24),
 
-                  // ── QUESTION BOX ───────────────────────
+                  // QUESTION BOX
                   Form(
                     key: _formKey,
                     child: TextFormField(
@@ -220,7 +225,8 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
                         hintText: 'Write your question…',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(strokeColor)),
+                          borderSide:
+                              const BorderSide(color: Color(strokeColor)),
                         ),
                         contentPadding: const EdgeInsets.all(16),
                       ),
@@ -229,10 +235,12 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
                     ),
                   ),
 
-                  // ── CHOICES ONLY IF MULTIPLE CHOICE ─────
+                  // CHOICES IF MC MODE
                   if (_isMultipleChoice) ...[
                     const SizedBox(height: 24),
-                    Text('Choices:', style: titleStyle(textColor: Colors.black, fontSize: 18)),
+                    Text('Choices:',
+                        style: titleStyle(
+                            textColor: Colors.black, fontSize: 18)),
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -253,17 +261,19 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
 
                   const SizedBox(height: 32),
 
-                  // ── NEXT / RETURN ───────────────────────
+                  // NEXT & RETURN
                   SizedBox(
                     height: 48,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(primaryColor),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
                       ),
                       onPressed: _saveQuestion,
                       child: Text('NEXT',
-                          style: titleStyle(textColor: Colors.black, fontSize: 16)),
+                          style: titleStyle(
+                              textColor: Colors.black, fontSize: 16)),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -272,11 +282,13 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Color(strokeColor)),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
                       ),
                       onPressed: () => Navigator.of(context).pop(),
                       child: Text('RETURN',
-                          style: subtitleStyle(textColor: Colors.black, fontSize: 16)),
+                          style: subtitleStyle(
+                              textColor: Colors.black, fontSize: 16)),
                     ),
                   ),
                 ],
@@ -288,16 +300,16 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
     );
   }
 
-  TextStyle titleStyle({required Color textColor, required double? fontSize}) {
-    return GoogleFonts.poppins(
-      textStyle:
-          TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold, color: textColor),
-    );
-  }
+  TextStyle titleStyle(
+          {required Color textColor, required double? fontSize}) =>
+      GoogleFonts.poppins(
+        textStyle: TextStyle(
+            fontSize: fontSize, fontWeight: FontWeight.bold, color: textColor),
+      );
 
-  TextStyle subtitleStyle({required Color textColor, required double? fontSize}) {
-    return GoogleFonts.poppins(
-      textStyle: TextStyle(fontSize: fontSize, color: textColor),
-    );
-  }
+  TextStyle subtitleStyle(
+          {required Color textColor, required double? fontSize}) =>
+      GoogleFonts.poppins(
+        textStyle: TextStyle(fontSize: fontSize, color: textColor),
+      );
 }
