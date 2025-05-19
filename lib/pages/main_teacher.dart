@@ -1,8 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'creation.dart'; // Make sure this path is correct
+import 'package:cheez_quiz_app/pages/create_quiz_page.dart';
+import 'package:cheez_quiz_app/pages/quiz_view_page.dart';
 
 const primaryColor = 0xFFFFCC00;
 const strokeColor = 0xFF6C6C6C;
@@ -12,6 +12,8 @@ class TeacherMainPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final quizRef = FirebaseFirestore.instance.collection('quizzes');
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -20,7 +22,6 @@ class TeacherMainPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
               Center(
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -52,10 +53,8 @@ class TeacherMainPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 32),
-
-              // Greeting
               Text(
-                'Hi, Joe!',
+                'Hi, Teacher!',
                 style: titleStyle(
                   textColor: Colors.black,
                   fontSize: 24,
@@ -63,72 +62,65 @@ class TeacherMainPage extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                'Ready to create new quizzes?',
+                'Ready to manage your quizzes?',
                 style: subtitleStyle(
                   textColor: Colors.black,
                   fontSize: 16,
                 ),
               ),
               const SizedBox(height: 24),
-
-              // Quiz list from Firestore
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('quizzes')
-                      // .where('createdBy', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
-                      .orderBy('createdAt', descending: true)
-                      .snapshots(),
+                  stream: quizRef.snapshots(),
                   builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return const Center(child: Text('Error loading quizzes.'));
+                    }
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
-                    }
-                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                      return const Center(child: Text('No quizzes yet'));
                     }
 
                     final quizzes = snapshot.data!.docs;
 
-                    return ListView.separated(
+                    if (quizzes.isEmpty) {
+                      return const Center(child: Text('No quizzes created yet.'));
+                    }
+
+                    return ListView.builder(
                       itemCount: quizzes.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 16),
                       itemBuilder: (context, index) {
                         final quiz = quizzes[index];
-                        final quizId = quiz.id;
-                        final title = quiz['title'] ?? 'Untitled';
-
-                        return FutureBuilder<QuerySnapshot>(
-                          future: FirebaseFirestore.instance
-                              .collection('quizzes')
-                              .doc(quizId)
-                              .collection('questions')
-                              .get(),
-                          builder: (context, qSnap) {
-                            final count = qSnap.data?.docs.length ?? 0;
-                            return QuizCard(
-                              title: title,
-                              subtitle: 'Prelims',
-                              itemsCount: '$count Items',
-                              imagePath: 'assets/cheese-icon.png',
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => QuizViewPage(
+                                  quizId: quiz.id,
+                                  quizTitle: quiz['title'] ?? 'Untitled',
+                                ),
+                              ),
                             );
                           },
+                          child: QuizCard(
+                            quizId: quiz.id,
+                            title: quiz['title'] ?? 'Untitled',
+                            subtitle: 'Prelims',
+                            itemsCount: 'Questions: ?',
+                            imagePath: 'assets/differentiation-bg.png',
+                          ),
                         );
                       },
                     );
                   },
                 ),
               ),
-
               const SizedBox(height: 16),
-
-              // Add New Quiz Button
               GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const TeacherQuestionPage(),
-                    ),
+                    MaterialPageRoute(builder: (_) => const CreateQuizPage()),
                   );
                 },
                 child: const AddQuizCard(),
@@ -142,6 +134,7 @@ class TeacherMainPage extends StatelessWidget {
 }
 
 class QuizCard extends StatelessWidget {
+  final String quizId;
   final String title;
   final String subtitle;
   final String itemsCount;
@@ -149,6 +142,7 @@ class QuizCard extends StatelessWidget {
 
   const QuizCard({
     Key? key,
+    required this.quizId,
     required this.title,
     required this.subtitle,
     required this.itemsCount,
@@ -159,6 +153,7 @@ class QuizCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 120,
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         border: Border.all(color: const Color(strokeColor)),
         borderRadius: BorderRadius.circular(12),
@@ -199,14 +194,8 @@ class QuizCard extends StatelessWidget {
               ],
             ),
 
-            // Item count badge on the right
-            Text(
-              itemsCount,
-              style: subtitleStyle(
-                textColor: Colors.white,
-                fontSize: 14,
-              ),
-            ),
+            // Placeholder
+            const Icon(Icons.chevron_right, color: Colors.white),
           ],
         ),
       ),

@@ -8,6 +8,7 @@ import 'package:cheez_quiz_app/pages/quiz_multiple.dart';
 import 'package:cheez_quiz_app/pages/result_bad_student.dart';
 import 'package:cheez_quiz_app/pages/result_good_student.dart';
 import 'package:cheez_quiz_app/pages/quiz_success_page.dart';
+import 'package:cheez_quiz_app/pages/create_quiz_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -37,9 +38,9 @@ class CheezQuizApp extends StatelessWidget {
         '/main_student': (context) => const StudentMainPage(),
         '/result_good_student': (context) => const StudentResultGoodPage(),
         '/result_bad_student': (context) => const StudentResultBadPage(),
-        '/creation': (context) => const TeacherQuestionPage(),
         '/quiz_success': (context) => const QuizSuccessPage(),
         '/quiz_multiple': (context) => const QuizMultiplePage(),
+        '/create_quiz': (context) => const CreateQuizPage(),
       },
     );
   }

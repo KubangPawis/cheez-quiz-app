@@ -28,4 +28,32 @@ class FirestoreService {
       'correctAnswer': correctAnswer,
     });
   }
+  Future<void> updateQuizTitle(String quizId, String newTitle) async {
+  await FirebaseFirestore.instance
+      .collection('quizzes')
+      .doc(quizId)
+      .update({'title': newTitle});
+}
+
+Future<void> deleteQuiz(String quizId) async {
+  final quizRef = FirebaseFirestore.instance.collection('quizzes').doc(quizId);
+
+  // Delete questions subcollection
+  final questionsSnapshot = await quizRef.collection('questions').get();
+  for (final doc in questionsSnapshot.docs) {
+    await doc.reference.delete();
+  }
+
+  // Delete the quiz document
+  await quizRef.delete();
+}
+
+  Future<void> deleteQuestion(String quizId, String questionId) async {
+    await FirebaseFirestore.instance
+        .collection('quizzes')
+        .doc(quizId)
+        .collection('questions')
+        .doc(questionId)
+        .delete();
+  }
 }
