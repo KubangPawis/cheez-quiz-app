@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'main_student.dart';
 
 const primaryColor = 0xFFFFCC00;
 const strokeColor = 0xFF6C6C6C;
@@ -9,138 +10,66 @@ class QuizSuccessPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // max width for larger screens
-    const double maxContentWidth = 800;
-
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: maxContentWidth),
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: Column(
-                children: [
-                  // — Logo + TEACHER —
-                  Center(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'CheezQuiz',
-                          style: titleStyle(
-                              textColor: Color(primaryColor), fontSize: 32),
-                        ),
-                        const SizedBox(width: 8),
-                        Image.asset(
-                          'assets/cheese-icon.png',
-                          width: 32,
-                          height: 32,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Center(
-                    child: Text(
-                      'TEACHER',
-                      style:
-                          titleStyle(textColor: Colors.black, fontSize: 16),
-                    ),
-                  ),
-
-                  const SizedBox(height: 48),
-
-                  // — Main Content: Congratulations + Mascot —
-                  Expanded(
-                    child: Row(
-                      children: [
-                        // Left side: text + button
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Congratulations!',
-                                style: titleStyle(
-                                    textColor: Colors.black, fontSize: 36),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                "You've successfully created another quiz.",
-                                style: subtitleStyle(
-                                    textColor: Colors.black, fontSize: 14),
-                              ),
-                              const SizedBox(height: 32),
-                              SizedBox(
-                                width: 300,
-                                height: 48,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        Color(primaryColor),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  onPressed: () {
-                                    // TODO: navigate onward
-                                  },
-                                  child: Text(
-                                    'CONTINUE',
-                                    style: titleStyle(
-                                        textColor: Colors.black,
-                                        fontSize: 16),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        // Right side: mascot image
-                        Expanded(
-                          child: Center(
-                            child: Image.asset(
-                              'assets/mascot-teacher.png',
-                              // adjust to taste:
-                              width: 300,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                'assets/mascot-happy.jpg',
+                width: 200,
+                height: 200,
               ),
-            ),
+              const SizedBox(height: 24),
+              Text(
+                'Quiz Submitted!',
+                style: GoogleFonts.poppins(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Color(primaryColor),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Thank you for completing the quiz. Your responses have been submitted.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const StudentMainPage()),
+                    (route) => false,
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(primaryColor),
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  'Return to Home',
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
-}
-
-/// Reusable Poppins text styles
-TextStyle titleStyle({required Color textColor, required double? fontSize}) {
-  return GoogleFonts.poppins(
-    textStyle: TextStyle(
-      fontSize: fontSize,
-      fontWeight: FontWeight.bold,
-      color: textColor,
-    ),
-  );
-}
-
-TextStyle subtitleStyle({required Color textColor, required double? fontSize}) {
-  return GoogleFonts.poppins(
-    textStyle: TextStyle(
-      fontSize: fontSize,
-      color: textColor,
-    ),
-  );
 }

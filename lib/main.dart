@@ -40,9 +40,7 @@ class CheezQuizApp extends StatelessWidget {
         '/result_good_student': (context) => const StudentResultGoodPage(),
         '/result_bad_student': (context) => const StudentResultBadPage(),
         '/quiz_success': (context) => const QuizSuccessPage(),
-        '/quiz_multiple': (context) => const QuizMultiplePage(),
         '/create_quiz': (context) => const CreateQuizPage(),
-        '/quiz_freeform': (context) => const StudentFreeformQuestionPage(),
       },
     );
   }

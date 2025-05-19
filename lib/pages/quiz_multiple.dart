@@ -1,223 +1,197 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import 'quiz_success_page.dart';
+import 'result_good_student.dart';
+import 'result_bad_student.dart';
 
 const primaryColor = 0xFFFFCC00;
 const strokeColor = 0xFF6C6C6C;
 
 class QuizMultiplePage extends StatefulWidget {
-  final int questionIndex;
-  final int totalQuestions;
+  final String quizId;
+  final String quizTitle;
+  final List<dynamic> questions;
+
   const QuizMultiplePage({
     Key? key,
-    this.questionIndex = 1,
-    this.totalQuestions = 5,
+    required this.quizId,
+    required this.quizTitle,
+    required this.questions,
   }) : super(key: key);
 
   @override
-  _QuizMultiplePageState createState() => _QuizMultiplePageState();
+  State<QuizMultiplePage> createState() => _QuizMultiplePageState();
 }
 
 class _QuizMultiplePageState extends State<QuizMultiplePage> {
-  int? _selectedIndex;
+  final _auth = FirebaseAuth.instance;
+  int _currentQuestion = 0;
+  Map<int, String> _selectedAnswers = {};
 
-  // your static data for now; you can pull these from args or your model later
-  final List<String> _labels = ['A.', 'B.', 'C.', 'D.'];
-  final List<String> _choices = ['7', 'x', '12', '3.5'];
+  void _submitQuiz() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    int correctCount = 0;
+    final answerList = <Map<String, dynamic>>[];
+
+    for (int i = 0; i < widget.questions.length; i++) {
+      final q = widget.questions[i] as Map<String, dynamic>;
+      final correct = q['correctAnswer'];
+      final selected = _selectedAnswers[i] ?? '';
+      final isCorrect = selected == correct;
+      if (isCorrect) correctCount++;
+
+      answerList.add({
+        'question': q['question'],
+        'selectedAnswer': selected,
+        'correctAnswer': correct,
+        'isCorrect': isCorrect,
+      });
+    }
+
+    final score = (correctCount / widget.questions.length) * 100;
+
+    await FirebaseFirestore.instance.collection('submissions').add({
+      'studentId': user.uid,
+      'quizId': widget.quizId,
+      'answers': answerList,
+      'score': score,
+      'submittedAt': Timestamp.now(),
+    });
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            score >= 60 ? const StudentResultGoodPage() : const StudentResultBadPage(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    const double maxWidth = 900;
-    const double gap = 16;
+    final question = widget.questions[_currentQuestion] as Map<String, dynamic>;
+    final selected = _selectedAnswers[_currentQuestion];
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: maxWidth),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
                 children: [
-                  // ─── HEADER ────────────────────────────────
-                  Center(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'CheezQuiz',
-                          style: titleStyle(
-                              textColor: Color(primaryColor), fontSize: 32),
-                        ),
-                        const SizedBox(width: 8),
-                        Image.asset(
-                          'assets/cheese-icon.png',
-                          width: 32,
-                          height: 32,
-                        ),
-                      ],
+                  Text(
+                    widget.quizTitle,
+                    style: titleStyle(textColor: Colors.black, fontSize: 24),
+                  ),
+                  const Spacer(),
+                  Text(
+                    'Question ${_currentQuestion + 1} / ${widget.questions.length}',
+                    style: subtitleStyle(textColor: Colors.black54, fontSize: 16),
+                  ),
+                ],
+              ),
+              const Divider(),
+
+              const SizedBox(height: 24),
+              Text(
+                question['question'],
+                style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 24),
+
+              // Options
+              ...['A', 'B', 'C', 'D'].map((letter) {
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: selected == letter ? Color(primaryColor) : Colors.grey.shade300,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    title: Text(
+                      question['choices'][letter] ?? '',
+                      style: GoogleFonts.poppins(fontSize: 16),
+                    ),
+                    leading: Radio<String>(
+                      value: letter,
+                      groupValue: selected,
+                      onChanged: (value) {
+                        setState(() => _selectedAnswers[_currentQuestion] = value!);
+                      },
+                      activeColor: Color(primaryColor),
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Center(
-                    child: Text(
-                      'STUDENT',
-                      style: titleStyle(textColor: Colors.black, fontSize: 16),
+                );
+              }),
+
+              const Spacer(),
+
+              Row(
+                children: [
+                  if (_currentQuestion > 0)
+                    OutlinedButton(
+                      onPressed: () {
+                        setState(() => _currentQuestion--);
+                      },
+                      child: const Text('Back'),
                     ),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // ─── QUESTION LABELS ───────────────────────
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Question ${widget.questionIndex} / ${widget.totalQuestions}',
-                      style: titleStyle(textColor: Colors.black, fontSize: 24),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Which of the following is a variable?',
-                      style: subtitleStyle(
-                          textColor: Colors.black, fontSize: 16),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // ─── CHOICES ───────────────────────────────
-                  Row(
-                    children: [
-                      _buildChoiceButton(0),
-                      SizedBox(width: gap),
-                      _buildChoiceButton(2),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      _buildChoiceButton(1),
-                      SizedBox(width: gap),
-                      _buildChoiceButton(3),
-                    ],
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // ─── NEXT & RETURN ─────────────────────────
-                  SizedBox(
-                    height: 48,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(primaryColor),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onPressed: _selectedIndex != null
-                          ? () {
-                              // TODO: lock in answer & navigate
+                  const Spacer(),
+                  ElevatedButton(
+                    onPressed: selected == null
+                        ? null
+                        : () {
+                            if (_currentQuestion < widget.questions.length - 1) {
+                              setState(() => _currentQuestion++);
+                            } else {
+                              _submitQuiz();
                             }
-                          : null, // disabled if none selected
-                      child: Text(
-                        'NEXT',
-                        style: titleStyle(
-                          textColor: Colors.black,
-                          fontSize: 16,
-                        ),
-                      ),
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(primaryColor),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    height: 48,
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(strokeColor)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text(
-                        'RETURN',
-                        style: subtitleStyle(
-                            textColor: Colors.black, fontSize: 16),
-                      ),
+                    child: Text(
+                      _currentQuestion < widget.questions.length - 1 ? 'Next' : 'Submit',
+                      style: const TextStyle(color: Colors.black),
                     ),
                   ),
                 ],
               ),
-            ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildChoiceButton(int index) {
-    final bool isSelected = _selectedIndex == index;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            // toggle selection
-            _selectedIndex = (isSelected ? null : index);
-          });
-        },
-        child: Container(
-          height: 60,
-          decoration: BoxDecoration(
-            color: isSelected
-                ? Color(primaryColor).withOpacity(0.4)
-                : Colors.white,
-            border: Border.all(color: Color(strokeColor)),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          alignment: Alignment.centerLeft,
-          child: RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: '${_labels[index]} ',
-                  style: titleStyle(
-                      textColor: Colors.black, fontSize: 16),
-                ),
-                TextSpan(
-                  text: _choices[index],
-                  style: subtitleStyle(
-                      textColor: Colors.black, fontSize: 16),
-                ),
-              ],
-            ),
-          ),
-        ),
+  TextStyle titleStyle({required Color textColor, required double? fontSize}) {
+    return GoogleFonts.poppins(
+      textStyle: TextStyle(
+        fontSize: fontSize,
+        fontWeight: FontWeight.bold,
+        color: textColor,
       ),
     );
   }
-}
 
-/// Reusable Poppins text styles
-TextStyle titleStyle({required Color textColor, required double? fontSize}) {
-  return GoogleFonts.poppins(
-    textStyle: TextStyle(
-      fontSize: fontSize,
-      fontWeight: FontWeight.bold,
-      color: textColor,
-    ),
-  );
-}
-
-TextStyle subtitleStyle({required Color textColor, required double? fontSize}) {
-  return GoogleFonts.poppins(
-    textStyle: TextStyle(
-      fontSize: fontSize,
-      color: textColor,
-    ),
-  );
+  TextStyle subtitleStyle({required Color textColor, required double? fontSize}) {
+    return GoogleFonts.poppins(
+      textStyle: TextStyle(
+        fontSize: fontSize,
+        color: textColor,
+      ),
+    );
+  }
 }
