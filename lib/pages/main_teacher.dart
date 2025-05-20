@@ -2,8 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:cheez_quiz_app/pages/create_quiz_page.dart';
-import 'package:cheez_quiz_app/pages/quiz_view_page.dart';
 
 const primaryColor = 0xFFFFCC00;
 const strokeColor = 0xFF6C6C6C;

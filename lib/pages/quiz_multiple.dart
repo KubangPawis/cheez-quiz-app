@@ -3,10 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'quiz_success_page.dart';
-import 'result_good_student.dart';
-import 'result_bad_student.dart';
-
 const primaryColor = 0xFFFFCC00;
 const strokeColor = 0xFF6C6C6C;
 
