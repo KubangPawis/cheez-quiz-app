@@ -28,16 +28,21 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
           password: _passwordController.text.trim(),
         );
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const TeacherMainPage()),
-        );
+        if (!mounted) {
+          return; // Check if the widget is still mounted (Safe checking)
+        }
+
+        Navigator.pushReplacementNamed(context, '/main_teacher');
       } on FirebaseAuthException catch (e) {
+        if (!mounted) return;
+
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(e.message ?? 'Login failed')));
       } finally {
-        setState(() => _isLoading = false);
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
       }
     }
   }

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'login_student.dart'; // ← Make sure you import your pages
-import 'login_teacher.dart';
 
 const primaryColor = 0xFFFFCC00;
 const strokeColor = 0xFF6C6C6C;
@@ -11,15 +9,9 @@ class HomePage extends StatelessWidget {
 
   void _navigateToRole(BuildContext context, String role) {
     if (role == 'student') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const StudentLoginPage()),
-      );
+      Navigator.pushNamed(context, '/login_student');
     } else if (role == 'teacher') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const TeacherLoginPage()),
-      );
+      Navigator.pushNamed(context, '/login_teacher');
     }
   }
 
@@ -42,20 +34,13 @@ class HomePage extends StatelessWidget {
                     fontSize: 48,
                   ),
                 ),
-                Image.asset(
-                  'assets/cheese-icon.png',
-                  width: 120,
-                  height: 60,
-                ),
+                Image.asset('assets/cheese-icon.png', width: 120, height: 60),
               ],
             ),
             const SizedBox(height: 30),
             Text(
               'WHAT ARE YOU?',
-              style: titleStyle(
-                textColor: Colors.black,
-                fontSize: 20,
-              ),
+              style: titleStyle(textColor: Colors.black, fontSize: 20),
             ),
             const SizedBox(height: 60),
 
@@ -153,9 +138,6 @@ TextStyle titleStyle({required Color textColor, required double? fontSize}) {
 
 TextStyle subtitleStyle({required Color textColor, required double? fontSize}) {
   return GoogleFonts.poppins(
-    textStyle: TextStyle(
-      fontSize: fontSize,
-      color: textColor,
-    ),
+    textStyle: TextStyle(fontSize: fontSize, color: textColor),
   );
 }

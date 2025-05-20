@@ -46,27 +46,18 @@ class TeacherMainPage extends StatelessWidget {
               Center(
                 child: Text(
                   'TEACHER',
-                  style: titleStyle(
-                    textColor: Colors.black,
-                    fontSize: 16,
-                  ),
+                  style: titleStyle(textColor: Colors.black, fontSize: 16),
                 ),
               ),
               const SizedBox(height: 32),
               Text(
                 'Hi, Teacher!',
-                style: titleStyle(
-                  textColor: Colors.black,
-                  fontSize: 24,
-                ),
+                style: titleStyle(textColor: Colors.black, fontSize: 24),
               ),
               const SizedBox(height: 4),
               Text(
                 'Ready to manage your quizzes?',
-                style: subtitleStyle(
-                  textColor: Colors.black,
-                  fontSize: 16,
-                ),
+                style: subtitleStyle(textColor: Colors.black, fontSize: 16),
               ),
               const SizedBox(height: 24),
               Expanded(
@@ -74,7 +65,9 @@ class TeacherMainPage extends StatelessWidget {
                   stream: quizRef.snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
-                      return const Center(child: Text('Error loading quizzes.'));
+                      return const Center(
+                        child: Text('Error loading quizzes.'),
+                      );
                     }
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
@@ -83,7 +76,9 @@ class TeacherMainPage extends StatelessWidget {
                     final quizzes = snapshot.data!.docs;
 
                     if (quizzes.isEmpty) {
-                      return const Center(child: Text('No quizzes created yet.'));
+                      return const Center(
+                        child: Text('No quizzes created yet.'),
+                      );
                     }
 
                     return ListView.builder(
@@ -92,14 +87,13 @@ class TeacherMainPage extends StatelessWidget {
                         final quiz = quizzes[index];
                         return GestureDetector(
                           onTap: () {
-                            Navigator.push(
+                            Navigator.pushNamed(
                               context,
-                              MaterialPageRoute(
-                                builder: (_) => QuizViewPage(
-                                  quizId: quiz.id,
-                                  quizTitle: quiz['title'] ?? 'Untitled',
-                                ),
-                              ),
+                              '/quiz_view',
+                              arguments: {
+                                'quizId': quiz.id,
+                                'quizTitle': quiz['title'] ?? 'Untitled',
+                              },
                             );
                           },
                           child: QuizCard(
@@ -118,10 +112,7 @@ class TeacherMainPage extends StatelessWidget {
               const SizedBox(height: 16),
               GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const CreateQuizPage()),
-                  );
+                  Navigator.pushNamed(context, '/create_quiz');
                 },
                 child: const AddQuizCard(),
               ),
@@ -178,18 +169,12 @@ class QuizCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: titleStyle(
-                    textColor: Colors.white,
-                    fontSize: 20,
-                  ),
+                  style: titleStyle(textColor: Colors.white, fontSize: 20),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: subtitleStyle(
-                    textColor: Colors.white70,
-                    fontSize: 14,
-                  ),
+                  style: subtitleStyle(textColor: Colors.white70, fontSize: 14),
                 ),
               ],
             ),
@@ -215,11 +200,7 @@ class AddQuizCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: const Center(
-        child: Icon(
-          Icons.add,
-          size: 40,
-          color: Color(strokeColor),
-        ),
+        child: Icon(Icons.add, size: 40, color: Color(strokeColor)),
       ),
     );
   }
@@ -237,9 +218,6 @@ TextStyle titleStyle({required Color textColor, required double? fontSize}) {
 
 TextStyle subtitleStyle({required Color textColor, required double? fontSize}) {
   return GoogleFonts.poppins(
-    textStyle: TextStyle(
-      fontSize: fontSize,
-      color: textColor,
-    ),
+    textStyle: TextStyle(fontSize: fontSize, color: textColor),
   );
 }

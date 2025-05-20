@@ -28,16 +28,22 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const StudentMainPage()),
-        );
+
+        if (!mounted) {
+          return; // Check if the widget is still mounted (Safe checking)
+        }
+
+        Navigator.pushReplacementNamed(context, '/main_student');
       } on FirebaseAuthException catch (e) {
+        if (!mounted) return;
+
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(e.message ?? 'Login failed')));
       } finally {
-        setState(() => _isLoading = false);
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
       }
     }
   }
