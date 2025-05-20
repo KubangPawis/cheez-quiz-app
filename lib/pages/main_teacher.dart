@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cheez_quiz_app/pages/create_quiz_page.dart';
@@ -9,6 +10,12 @@ const strokeColor = 0xFF6C6C6C;
 
 class TeacherMainPage extends StatelessWidget {
   const TeacherMainPage({Key? key}) : super(key: key);
+
+  Future<void> _handleLogout(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+    // Navigate to your login screen. Replace '/login' with your actual route:
+    Navigator.of(context).pushReplacementNamed('/login_teacher');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,26 +29,40 @@ class TeacherMainPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'CheezQuiz',
-                      style: titleStyle(
-                        textColor: const Color(primaryColor),
-                        fontSize: 32,
+              // ── LOGO + LOGOUT BUTTON ─────────────────────
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // placeholder to keep logo centered
+                  const SizedBox(width: 48),
+                  // your logo
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'CheezQuiz',
+                        style: titleStyle(
+                          textColor: const Color(primaryColor),
+                          fontSize: 32,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Image.asset(
-                      'assets/cheese-icon.png',
-                      width: 32,
-                      height: 32,
-                    ),
-                  ],
-                ),
+                      const SizedBox(width: 8),
+                      Image.asset(
+                        'assets/cheese-icon.png',
+                        width: 32,
+                        height: 32,
+                      ),
+                    ],
+                  ),
+                  // logout button
+                  IconButton(
+                    icon: const Icon(Icons.logout),
+                    color: Colors.black,
+                    onPressed: () => _handleLogout(context),
+                  ),
+                ],
               ),
+
               const SizedBox(height: 4),
               Center(
                 child: Text(
@@ -52,6 +73,7 @@ class TeacherMainPage extends StatelessWidget {
                   ),
                 ),
               ),
+
               const SizedBox(height: 32),
               Text(
                 'Hi, Teacher!',
@@ -69,6 +91,8 @@ class TeacherMainPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
+
+              // ── Quiz List ────────────────────────────────
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
                   stream: quizRef.snapshots(),
@@ -81,7 +105,6 @@ class TeacherMainPage extends StatelessWidget {
                     }
 
                     final quizzes = snapshot.data!.docs;
-
                     if (quizzes.isEmpty) {
                       return const Center(child: Text('No quizzes created yet.'));
                     }
@@ -115,6 +138,7 @@ class TeacherMainPage extends StatelessWidget {
                   },
                 ),
               ),
+
               const SizedBox(height: 16),
               GestureDetector(
                 onTap: () {
