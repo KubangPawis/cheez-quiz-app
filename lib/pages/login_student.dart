@@ -33,9 +33,9 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
           MaterialPageRoute(builder: (context) => const StudentMainPage()),
         );
       } on FirebaseAuthException catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message ?? 'Login failed')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message ?? 'Login failed')));
       } finally {
         setState(() => _isLoading = false);
       }
@@ -113,7 +113,7 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Username',
+                                'Email',
                                 style: GoogleFonts.poppins(fontSize: 20),
                               ),
                               const SizedBox(height: 8),
@@ -165,34 +165,40 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
                               const SizedBox(height: 32),
                               Center(
                                 child: SizedBox(
-                                  width: MediaQuery.of(context).size.width * 0.4,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.4,
                                   child: Column(
                                     children: [
                                       _isLoading
                                           ? const CircularProgressIndicator()
                                           : SizedBox(
-                                              width: double.infinity,
-                                              child: TextButton(
-                                                onPressed: _login,
-                                                style: TextButton.styleFrom(
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius: BorderRadius.circular(15),
-                                                  ),
-                                                  backgroundColor: const Color(primaryColor),
-                                                  foregroundColor: Colors.black,
-                                                  padding: const EdgeInsets.all(15),
+                                            width: double.infinity,
+                                            child: TextButton(
+                                              onPressed: _login,
+                                              style: TextButton.styleFrom(
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(15),
                                                 ),
-                                                child: Text(
-                                                  'LOG IN',
-                                                  style: GoogleFonts.poppins(
-                                                    textStyle: const TextStyle(
-                                                      fontSize: 20,
-                                                      fontWeight: FontWeight.w600,
-                                                    ),
+                                                backgroundColor: const Color(
+                                                  primaryColor,
+                                                ),
+                                                foregroundColor: Colors.black,
+                                                padding: const EdgeInsets.all(
+                                                  15,
+                                                ),
+                                              ),
+                                              child: Text(
+                                                'LOG IN',
+                                                style: GoogleFonts.poppins(
+                                                  textStyle: const TextStyle(
+                                                    fontSize: 20,
+                                                    fontWeight: FontWeight.w600,
                                                   ),
                                                 ),
                                               ),
                                             ),
+                                          ),
                                       const SizedBox(height: 16),
                                       SizedBox(
                                         width: double.infinity,
@@ -206,7 +212,8 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
                                               width: 1,
                                             ),
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(15),
+                                              borderRadius:
+                                                  BorderRadius.circular(15),
                                             ),
                                             foregroundColor: Colors.black,
                                             padding: const EdgeInsets.all(15),
