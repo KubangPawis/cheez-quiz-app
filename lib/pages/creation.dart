@@ -56,51 +56,53 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
   }
 
   Future<void> _saveAndContinue() async {
-    if (!_formKey.currentState!.validate()) return;
+  if (!_formKey.currentState!.validate()) return;
 
-    final question = _questionCtrl.text.trim();
-    Map<String, String> choices;
-    String correct;
+  final question = _questionCtrl.text.trim();
+  Map<String, String> choices;
+  String correct;
 
-    switch (_type) {
-      case QuestionType.multiple:
-        choices = {
-          'A': _choiceA.text.trim(),
-          'B': _choiceB.text.trim(),
-          'C': _choiceC.text.trim(),
-          'D': _choiceD.text.trim(),
-        };
-        correct = _selectedCorrect;
-        break;
-      case QuestionType.trueFalse:
-        choices = {'A': 'True', 'B': 'False'};
-        correct = _selectedCorrect;
-        break;
-      case QuestionType.freeform:
-        choices = {};
-        correct = '';
-        break;
-    }
-
-    await _firestore.addQuestion(
-      quizId: widget.quizId,
-      question: question,
-      choices: choices,
-      correctAnswer: correct,
-    );
-
-    // clear & bump
-    setState(() {
-      _currentIndex++;
-      _questionCtrl.clear();
-      _choiceA.clear();
-      _choiceB.clear();
-      _choiceC.clear();
-      _choiceD.clear();
-      _selectedCorrect = 'A';
-      _type = QuestionType.multiple;
-    });
+  switch (_type) {
+    case QuestionType.multiple:
+      choices = {
+        'A': _choiceA.text.trim(),
+        'B': _choiceB.text.trim(),
+        'C': _choiceC.text.trim(),
+        'D': _choiceD.text.trim(),
+      };
+      correct = _selectedCorrect;
+      break;
+    case QuestionType.trueFalse:
+      choices = {'A': 'True', 'B': 'False'};
+      correct = _selectedCorrect;
+      break;
+    case QuestionType.freeform:
+      choices = {};
+      correct = '';
+      break;
   }
+
+  // pass type.name ("multiple", "trueFalse", or "freeform") to your service:
+  await _firestore.addQuestion(
+    quizId: widget.quizId,
+    question: question,
+    choices: choices,
+    correctAnswer: correct,
+    type: _type.name,
+  );
+
+  setState(() {
+    _currentIndex++;
+    _questionCtrl.clear();
+    _choiceA.clear();
+    _choiceB.clear();
+    _choiceC.clear();
+    _choiceD.clear();
+    _selectedCorrect = 'A';
+    _type = QuestionType.multiple;
+  });
+}
+
 
   void _finishQuiz() {
     ScaffoldMessenger.of(context).showSnackBar(

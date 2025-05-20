@@ -17,6 +17,7 @@ class FirestoreService {
     required String question,
     required Map<String, String> choices,
     required String correctAnswer,
+    required String type
   }) async {
     await _db
         .collection('quizzes')
@@ -26,6 +27,7 @@ class FirestoreService {
       'question': question,
       'choices': choices,
       'correctAnswer': correctAnswer,
+      'type': type
     });
   }
   Future<void> updateQuizTitle(String quizId, String newTitle) async {

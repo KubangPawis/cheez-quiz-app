@@ -19,7 +19,7 @@ class QuizReviewPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final score = submission['score'] as num? ?? 0;
     final answers = submission['answers'] as List<dynamic>? ?? [];
-
+    
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
