@@ -19,15 +19,17 @@ class QuizReviewPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final scorePercentage = submission['scorePercentage'] as num? ?? 0;
     final answers = submission['answers'] as List<dynamic>? ?? [];
-    
+
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 0,
         title: Text(quizTitle, style: GoogleFonts.poppins(color: Colors.black)),
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
+      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -93,8 +95,8 @@ class QuizReviewPage extends StatelessWidget {
               ),
               onPressed: () => Navigator.of(context).pop(),
               child: Text(
-                'Back to Quizzes',
-                style: GoogleFonts.poppins(color: Colors.black),
+                'RETURN',
+                style: titleStyle(textColor: Colors.black, fontSize: 18),
               ),
             ),
           ],
@@ -102,4 +104,20 @@ class QuizReviewPage extends StatelessWidget {
       ),
     );
   }
+}
+
+TextStyle titleStyle({required Color textColor, required double? fontSize}) {
+  return GoogleFonts.poppins(
+    textStyle: TextStyle(
+      fontSize: fontSize,
+      fontWeight: FontWeight.bold,
+      color: textColor,
+    ),
+  );
+}
+
+TextStyle subtitleStyle({required Color textColor, required double? fontSize}) {
+  return GoogleFonts.poppins(
+    textStyle: TextStyle(fontSize: fontSize, color: textColor),
+  );
 }
