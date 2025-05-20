@@ -75,7 +75,7 @@ class _QuizPageState extends State<QuizPage> {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    int correct = 0, scorable = 0;
+    int correctCount = 0, scorable = 0;
     final answers = <Map<String, dynamic>>[];
 
     for (int i = 0; i < widget.questions.length; i++) {
@@ -89,7 +89,7 @@ class _QuizPageState extends State<QuizPage> {
       } else {
         selected = _selectedChoices[i] ?? '';
         scorable++;
-        if (selected == correctAns) correct++;
+        if (selected == correctAns) correctCount++;
       }
 
       answers.add({
@@ -97,28 +97,35 @@ class _QuizPageState extends State<QuizPage> {
         'type': type,
         'selectedAnswer': selected,
         'correctAnswer': correctAns,
-        'isCorrect': type=='freeform' ? null : selected == correctAns,
+        'isCorrect': type == 'freeform' ? null : selected == correctAns,
       });
     }
 
-    final score = scorable>0 ? (correct/scorable)*100 : 0;
+    final score = correctCount;
+    final scorePercentage = scorable == 0 ? 0 : (correctCount / scorable) * 100;
 
     await FirebaseFirestore.instance.collection('submissions').add({
       'studentId': user.uid,
       'quizId': widget.quizId,
       'answers': answers,
       'score': score,
+      'scorePercentage': scorePercentage,
       'submittedAt': Timestamp.now(),
     });
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => score >= 60
-            ? const StudentResultGoodPage()
-            : const StudentResultBadPage(),
-      ),
-    );
+    if (scorePercentage > 0.5) {
+      Navigator.pushReplacementNamed(
+        context,
+        '/quiz_result_success',
+        arguments: {'quizScore': score.toString()},
+      );
+    } else {
+      Navigator.pushReplacementNamed(
+        context,
+        '/quiz_result_fail',
+        arguments: {'quizScore': score.toString()},
+      );
+    }
   }
 
   @override
@@ -138,13 +145,17 @@ class _QuizPageState extends State<QuizPage> {
               // ─────────── HEADER ─────────────────────
               Row(
                 children: [
-                  Text(widget.quizTitle,
-                      style: titleStyle(textColor: Colors.black, fontSize: 24)),
+                  Text(
+                    widget.quizTitle,
+                    style: titleStyle(textColor: Colors.black, fontSize: 24),
+                  ),
                   const Spacer(),
                   Text(
-                    'Question ${_current+1} / ${widget.questions.length}',
-                    style:
-                        subtitleStyle(textColor: Colors.black54, fontSize: 16),
+                    'Question ${_current + 1} / ${widget.questions.length}',
+                    style: subtitleStyle(
+                      textColor: Colors.black54,
+                      fontSize: 16,
+                    ),
                   ),
                 ],
               ),
@@ -152,9 +163,13 @@ class _QuizPageState extends State<QuizPage> {
               const SizedBox(height: 24),
 
               // ─────────── QUESTION TEXT ──────────────
-              Text(q['question'],
-                  style: GoogleFonts.poppins(
-                      fontSize: 18, fontWeight: FontWeight.w600)),
+              Text(
+                q['question'],
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const SizedBox(height: 24),
 
               // ─────────── MULTIPLE CHOICE ────────────
@@ -165,9 +180,10 @@ class _QuizPageState extends State<QuizPage> {
                     label: ltr,
                     text: txt,
                     selected: selected == ltr,
-                    onTap: () => setState(() {
-                      _selectedChoices[_current] = ltr;
-                    }),
+                    onTap:
+                        () => setState(() {
+                          _selectedChoices[_current] = ltr;
+                        }),
                   );
                 }),
 
@@ -177,17 +193,19 @@ class _QuizPageState extends State<QuizPage> {
                   label: 'A',
                   text: 'True',
                   selected: selected == 'A',
-                  onTap: () => setState(() {
-                    _selectedChoices[_current] = 'A';
-                  }),
+                  onTap:
+                      () => setState(() {
+                        _selectedChoices[_current] = 'A';
+                      }),
                 ),
                 _buildOption(
                   label: 'B',
                   text: 'False',
                   selected: selected == 'B',
-                  onTap: () => setState(() {
-                    _selectedChoices[_current] = 'B';
-                  }),
+                  onTap:
+                      () => setState(() {
+                        _selectedChoices[_current] = 'B';
+                      }),
                 ),
               ],
 
@@ -222,7 +240,9 @@ class _QuizPageState extends State<QuizPage> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(primaryColor),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 12),
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                     ),
                     child: Text(
                       _isLast ? 'Submit' : 'Next',
@@ -248,8 +268,9 @@ class _QuizPageState extends State<QuizPage> {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         border: Border.all(
-            color: selected ? const Color(primaryColor) : Colors.grey.shade300,
-            width: 2),
+          color: selected ? const Color(primaryColor) : Colors.grey.shade300,
+          width: 2,
+        ),
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
@@ -268,15 +289,18 @@ class _QuizPageState extends State<QuizPage> {
 
 // ─────────── TEXT STYLES ───────────────────────
 
-TextStyle titleStyle(
-        {required Color textColor, required double? fontSize}) =>
+TextStyle titleStyle({required Color textColor, required double? fontSize}) =>
     GoogleFonts.poppins(
-      textStyle:
-          TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold, color: textColor),
+      textStyle: TextStyle(
+        fontSize: fontSize,
+        fontWeight: FontWeight.bold,
+        color: textColor,
+      ),
     );
 
-TextStyle subtitleStyle(
-        {required Color textColor, required double? fontSize}) =>
-    GoogleFonts.poppins(
-      textStyle: TextStyle(fontSize: fontSize, color: textColor),
-    );
+TextStyle subtitleStyle({
+  required Color textColor,
+  required double? fontSize,
+}) => GoogleFonts.poppins(
+  textStyle: TextStyle(fontSize: fontSize, color: textColor),
+);
