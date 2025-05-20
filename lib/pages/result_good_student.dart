@@ -85,7 +85,7 @@ class StudentResultGoodPage extends StatelessWidget {
         ),
         SizedBox(height: 20),
         Text(
-          'Keep up the good work! You are on your way to becoming a math master.',
+          'Keep up the good work! You are on your way to becoming a CheeseQuiz master.',
           style: subtitleStyle(textColor: Colors.black, fontSize: 16),
         ),
 
