@@ -29,23 +29,20 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
       final user = FirebaseAuth.instance.currentUser;
 
       if (user == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User not logged in')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('User not logged in')));
         return;
       }
 
       final quizTitle = _titleController.text.trim();
-      final quizId =
-          await FirestoreService().createQuiz(quizTitle, user.uid);
+      final quizId = await FirestoreService().createQuiz(quizTitle, user.uid);
 
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => TeacherQuestionPage(
-            quizTitle: quizTitle,
-            quizId: quizId,
-          ),
+          builder:
+              (_) => TeacherQuestionPage(quizTitle: quizTitle, quizId: quizId),
         ),
       );
     }
@@ -61,8 +58,9 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
         iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(128.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               'Create New Quiz',
@@ -81,8 +79,10 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -98,8 +98,11 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(primaryColor),
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 14,
+                  horizontal: 48,
+                  vertical: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
                 ),
               ),
               child: Text(
