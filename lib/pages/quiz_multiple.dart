@@ -102,13 +102,14 @@ class _QuizPageState extends State<QuizPage> {
     }
 
     final score = correctCount;
-    final scorePercentage = correctCount / widget.questions.length;
+    final scorePercentage = scorable == 0 ? 0 : (correctCount / scorable) * 100;
 
     await FirebaseFirestore.instance.collection('submissions').add({
       'studentId': user.uid,
       'quizId': widget.quizId,
       'answers': answers,
       'score': score,
+      'scorePercentage': scorePercentage,
       'submittedAt': Timestamp.now(),
     });
 
