@@ -82,7 +82,7 @@ class _StudentMainPageState extends State<StudentMainPage> {
               quizTitle: quizData['title'],
               questions: questions,
             )
-          : QuizMultiplePage(
+          : QuizPage(
               quizId: quizId,
               quizTitle: quizData['title'],
               questions: questions,
