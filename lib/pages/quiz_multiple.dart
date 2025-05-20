@@ -11,8 +11,7 @@ const strokeColor = 0xFF6C6C6C;
 class QuizPage extends StatefulWidget {
   final String quizId;
   final String quizTitle;
-  final List<dynamic>
-  questions; // each question map must have 'question', 'choices', 'correctAnswer'
+  final List<dynamic> questions;
 
   const QuizPage({
     Key? key,
@@ -27,11 +26,9 @@ class QuizPage extends StatefulWidget {
 
 class _QuizPageState extends State<QuizPage> {
   final _auth = FirebaseAuth.instance;
-
-  int _current = 0;
   final Map<int, String> _selected = {};
-
   bool get _isLast => _current == widget.questions.length - 1;
+  int _current = 0;
 
   bool _hasAnswered() {
     return (_selected[_current]?.isNotEmpty ?? false);
