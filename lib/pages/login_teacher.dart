@@ -207,9 +207,7 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
                                         width: double.infinity,
                                         child: OutlinedButton(
                                           onPressed: () {
-                                            Navigator.pop(
-                                              context,
-                                            ); // return to HomePage
+                                            Navigator.pop(context);
                                           },
                                           style: OutlinedButton.styleFrom(
                                             side: const BorderSide(

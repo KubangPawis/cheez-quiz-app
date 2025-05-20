@@ -26,6 +26,12 @@ class _StudentMainPageState extends State<StudentMainPage> {
     _user = _auth.currentUser!;
   }
 
+  Future<void> _handleLogout() async {
+    await _auth.signOut();
+    // replace '/login' with whichever route your login screen uses
+    Navigator.of(context).pushReplacementNamed('/login_student');
+  }
+
   Future<bool> _hasSubmitted(String quizId) async {
     final snap =
         await FirebaseFirestore.instance
@@ -101,19 +107,36 @@ class _StudentMainPageState extends State<StudentMainPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // HEADER
+              // ── HEADER + LOGOUT ───────────────────────────
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'CheezQuiz',
-                    style: titleStyle(
-                      textColor: Color(primaryColor),
-                      fontSize: 32,
-                    ),
+                  // placeholder to keep logo centered
+                  const SizedBox(width: 48),
+                  // your centered logo
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'CheezQuiz',
+                        style: titleStyle(
+                          textColor: Color(primaryColor),
+                          fontSize: 32,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Image.asset(
+                        'assets/cheese-icon.png',
+                        width: 32,
+                        height: 32,
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Image.asset('assets/cheese-icon.png', width: 32, height: 32),
+                  // logout button
+                  IconButton(
+                    icon: const Icon(Icons.logout, color: Colors.black),
+                    onPressed: _handleLogout,
+                  ),
                 ],
               ),
               const SizedBox(height: 4),
