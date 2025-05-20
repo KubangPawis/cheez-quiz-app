@@ -84,7 +84,9 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
 
   void _finishQuiz() {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Quiz saved with ${_currentIndex - 1} questions!')),
+      SnackBar(
+        content: Text('Quiz saved with ${_currentIndex - 1} questions!'),
+      ),
     );
     Navigator.of(context).pop();
   }
@@ -95,12 +97,18 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
         controller: ctrl,
         decoration: InputDecoration(
           hintText: hint,
-          prefix: Text('$letter  ', style: titleStyle(textColor: Colors.black, fontSize: 16)),
+          prefix: Text(
+            '$letter  ',
+            style: titleStyle(textColor: Colors.black, fontSize: 16),
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: const BorderSide(color: Color(strokeColor)),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 14,
+          ),
         ),
         validator: (v) => (v ?? '').isEmpty ? 'Required' : null,
       ),
@@ -126,25 +134,40 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('CheezQuiz',
-                          style: titleStyle(textColor: const Color(primaryColor), fontSize: 32)
+                        Text(
+                          'CheezQuiz',
+                          style: titleStyle(
+                            textColor: const Color(primaryColor),
+                            fontSize: 32,
+                          ),
                         ),
                         const SizedBox(width: 8),
-                        Image.asset('assets/cheese-icon.png', width: 32, height: 32),
+                        Image.asset(
+                          'assets/cheese-icon.png',
+                          width: 32,
+                          height: 32,
+                        ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Center(child: Text('TEACHER', style: titleStyle(textColor: Colors.black, fontSize: 16))),
+                  Center(
+                    child: Text(
+                      'TEACHER',
+                      style: titleStyle(textColor: Colors.black, fontSize: 16),
+                    ),
+                  ),
                   const SizedBox(height: 32),
 
                   // QUESTION NUMBER
-                  Text('Question $_currentIndex',
-                    style: titleStyle(textColor: Colors.black, fontSize: 24)
+                  Text(
+                    'Question $_currentIndex',
+                    style: titleStyle(textColor: Colors.black, fontSize: 24),
                   ),
                   const SizedBox(height: 4),
-                  Text('Fill up the following fields.',
-                    style: subtitleStyle(textColor: Colors.black, fontSize: 16)
+                  Text(
+                    'Fill up the following fields.',
+                    style: subtitleStyle(textColor: Colors.black, fontSize: 16),
                   ),
                   const SizedBox(height: 16),
 
@@ -158,47 +181,68 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
                         hintText: 'Write your question…',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(strokeColor)),
+                          borderSide: const BorderSide(
+                            color: Color(strokeColor),
+                          ),
                         ),
                         contentPadding: const EdgeInsets.all(16),
                       ),
-                      validator: (v) => (v ?? '').isEmpty ? 'Please enter a question' : null,
+                      validator:
+                          (v) =>
+                              (v ?? '').isEmpty
+                                  ? 'Please enter a question'
+                                  : null,
                     ),
                   ),
 
                   // CHOICES
                   const SizedBox(height: 24),
-                  Text('Choices:', style: titleStyle(textColor: Colors.black, fontSize: 18)),
+                  Text(
+                    'Choices:',
+                    style: titleStyle(textColor: Colors.black, fontSize: 18),
+                  ),
                   const SizedBox(height: 12),
-                  Row(children: [
-                    _choiceField('A.', _choiceA, 'Write Choice A'),
-                    SizedBox(width: gap),
-                    _choiceField('C.', _choiceC, 'Write Choice C'),
-                  ]),
+                  Row(
+                    children: [
+                      _choiceField('A.', _choiceA, 'Write Choice A'),
+                      SizedBox(width: gap),
+                      _choiceField('C.', _choiceC, 'Write Choice C'),
+                    ],
+                  ),
                   const SizedBox(height: 12),
-                  Row(children: [
-                    _choiceField('B.', _choiceB, 'Write Choice B'),
-                    SizedBox(width: gap),
-                    _choiceField('D.', _choiceD, 'Write Choice D'),
-                  ]),
+                  Row(
+                    children: [
+                      _choiceField('B.', _choiceB, 'Write Choice B'),
+                      SizedBox(width: gap),
+                      _choiceField('D.', _choiceD, 'Write Choice D'),
+                    ],
+                  ),
 
                   // CORRECT ANSWER
                   const SizedBox(height: 24),
-                  Text('Select correct answer:', style: titleStyle(textColor: Colors.black, fontSize: 18)),
+                  Text(
+                    'Select correct answer:',
+                    style: titleStyle(textColor: Colors.black, fontSize: 18),
+                  ),
                   const SizedBox(height: 8),
-                  Row(children: ['A', 'B', 'C', 'D'].map((l) {
-                    return Row(
-                      children: [
-                        Radio<String>(
-                          value: l,
-                          groupValue: _selectedCorrect,
-                          onChanged: (v) => setState(() => _selectedCorrect = v!),
-                        ),
-                        Text(l),
-                        const SizedBox(width: 16),
-                      ],
-                    );
-                  }).toList()),
+                  Row(
+                    children:
+                        ['A', 'B', 'C', 'D'].map((l) {
+                          return Row(
+                            children: [
+                              Radio<String>(
+                                value: l,
+                                groupValue: _selectedCorrect,
+                                onChanged:
+                                    (v) =>
+                                        setState(() => _selectedCorrect = v!),
+                              ),
+                              Text(l),
+                              const SizedBox(width: 16),
+                            ],
+                          );
+                        }).toList(),
+                  ),
 
                   const Spacer(),
 
@@ -209,21 +253,45 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(primaryColor),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 48,
+                              vertical: 16,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                           onPressed: _saveAndContinue,
-                          child: const Text('Add Question'),
+                          child: Text(
+                            'Add Question',
+                            style: titleStyle(
+                              textColor: Colors.black,
+                              fontSize: 16,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: OutlinedButton(
                           style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Color(strokeColor)),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            side: BorderSide(color: Color(strokeColor)),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 48,
+                              vertical: 16,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                           onPressed: _finishQuiz,
-                          child: const Text('Finish Quiz'),
+                          child: Text(
+                            'Finish Quiz',
+                            style: titleStyle(
+                              textColor: Colors.black,
+                              fontSize: 16,
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -242,10 +310,16 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
 
 TextStyle titleStyle({required Color textColor, required double? fontSize}) =>
     GoogleFonts.poppins(
-      textStyle: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold, color: textColor),
+      textStyle: TextStyle(
+        fontSize: fontSize,
+        fontWeight: FontWeight.bold,
+        color: textColor,
+      ),
     );
 
-TextStyle subtitleStyle({required Color textColor, required double? fontSize}) =>
-    GoogleFonts.poppins(
-      textStyle: TextStyle(fontSize: fontSize, color: textColor),
-    );
+TextStyle subtitleStyle({
+  required Color textColor,
+  required double? fontSize,
+}) => GoogleFonts.poppins(
+  textStyle: TextStyle(fontSize: fontSize, color: textColor),
+);
