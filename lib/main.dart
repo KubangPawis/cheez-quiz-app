@@ -11,6 +11,7 @@ import 'package:cheez_quiz_app/pages/result_good_student.dart';
 import 'package:cheez_quiz_app/pages/quiz_success_page.dart';
 import 'package:cheez_quiz_app/pages/create_quiz_page.dart';
 import 'package:cheez_quiz_app/pages/sign_up_student.dart';
+import 'package:cheez_quiz_app/pages/sign_up_teacher.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -35,6 +36,7 @@ class CheezQuizApp extends StatelessWidget {
         '/login_teacher': (context) => const TeacherLoginPage(),
         '/login_student': (context) => const StudentLoginPage(),
         '/sign_up_student': (context) => const StudentSignUpPage(),
+        '/sign_up_teacher': (context) => const TeacherSignUpPage(),
         '/main_teacher': (context) => const TeacherMainPage(),
         '/main_student': (context) => const StudentMainPage(),
         '/quiz_success': (context) => const QuizSuccessPage(),

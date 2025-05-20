@@ -5,31 +5,31 @@ import 'package:google_fonts/google_fonts.dart';
 const primaryColor = 0xFFFFCC00;
 const strokeColor = 0xFF6C6C6C;
 
-class TeacherLoginPage extends StatefulWidget {
-  const TeacherLoginPage({super.key});
+class TeacherSignUpPage extends StatefulWidget {
+  const TeacherSignUpPage({super.key});
 
   @override
-  State<TeacherLoginPage> createState() => _TeacherLoginPageState();
+  State<TeacherSignUpPage> createState() => _TeacherSignUpPageState();
 }
 
-class _TeacherLoginPageState extends State<TeacherLoginPage> {
+class _TeacherSignUpPageState extends State<TeacherSignUpPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _retypePasswordController =
+      TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
-  void _login() async {
+  void _signUp() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       try {
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
 
-        if (!mounted) {
-          return; // Check if the widget is still mounted (Safe checking)
-        }
+        if (!mounted) return;
 
         Navigator.pushReplacementNamed(context, '/main_teacher');
       } on FirebaseAuthException catch (e) {
@@ -37,7 +37,7 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
 
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(e.message ?? 'Login failed')));
+        ).showSnackBar(SnackBar(content: Text(e.message ?? 'Sign-up failed')));
       } finally {
         if (mounted) {
           setState(() => _isLoading = false);
@@ -164,6 +164,32 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
                                   return null;
                                 },
                               ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Re-Type Password',
+                                style: GoogleFonts.poppins(fontSize: 20),
+                              ),
+                              const SizedBox(height: 8),
+                              TextFormField(
+                                controller: _retypePasswordController,
+                                obscureText: true,
+                                decoration: InputDecoration(
+                                  hintText: 'Enter your password',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                    horizontal: 16,
+                                  ),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter your password';
+                                  }
+                                  return null;
+                                },
+                              ),
                               const SizedBox(height: 32),
                               Center(
                                 child: SizedBox(
@@ -176,7 +202,7 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
                                           : SizedBox(
                                             width: double.infinity,
                                             child: TextButton(
-                                              onPressed: _login,
+                                              onPressed: _signUp,
                                               style: TextButton.styleFrom(
                                                 shape: RoundedRectangleBorder(
                                                   borderRadius:
@@ -191,7 +217,7 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
                                                 ),
                                               ),
                                               child: Text(
-                                                'LOG IN',
+                                                'SIGN UP',
                                                 style: GoogleFonts.poppins(
                                                   textStyle: const TextStyle(
                                                     fontSize: 20,
@@ -208,7 +234,7 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
                                           onPressed: () {
                                             Navigator.pushNamed(
                                               context,
-                                              '/sign_up_teacher',
+                                              '/login_teacher',
                                             );
                                           },
                                           style: OutlinedButton.styleFrom(
@@ -224,7 +250,7 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
                                             padding: const EdgeInsets.all(15),
                                           ),
                                           child: Text(
-                                            'SIGN UP',
+                                            'LOGIN',
                                             style: GoogleFonts.poppins(
                                               textStyle: const TextStyle(
                                                 fontSize: 20,
