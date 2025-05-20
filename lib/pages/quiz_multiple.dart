@@ -10,12 +10,12 @@ import 'result_bad_student.dart';
 const primaryColor = 0xFFFFCC00;
 const strokeColor = 0xFF6C6C6C;
 
-class QuizMultiplePage extends StatefulWidget {
+class QuizPage extends StatefulWidget {
   final String quizId;
   final String quizTitle;
-  final List<dynamic> questions;
+  final List<dynamic> questions; // each question map must have a `type` key
 
-  const QuizMultiplePage({
+  const QuizPage({
     Key? key,
     required this.quizId,
     required this.quizTitle,
@@ -23,33 +23,81 @@ class QuizMultiplePage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<QuizMultiplePage> createState() => _QuizMultiplePageState();
+  State<QuizPage> createState() => _QuizPageState();
 }
 
-class _QuizMultiplePageState extends State<QuizMultiplePage> {
+class _QuizPageState extends State<QuizPage> {
   final _auth = FirebaseAuth.instance;
-  int _currentQuestion = 0;
-  Map<int, String> _selectedAnswers = {};
 
-  void _submitQuiz() async {
+  int _current = 0;
+  final Map<int, String> _selectedChoices = {};
+  final Map<int, TextEditingController> _freeformCtrls = {};
+
+  @override
+  void initState() {
+    super.initState();
+    // Prepare controllers for any freeform questions
+    for (int i = 0; i < widget.questions.length; i++) {
+      final q = widget.questions[i] as Map<String, dynamic>;
+      if (q['type'] == 'freeform') {
+        _freeformCtrls[i] = TextEditingController();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _freeformCtrls.values.forEach((c) => c.dispose());
+    super.dispose();
+  }
+
+  bool get _isLast => _current == widget.questions.length - 1;
+
+  bool _hasAnswered() {
+    final q = widget.questions[_current] as Map<String, dynamic>;
+    final t = q['type'] as String? ?? 'multiple';
+    if (t == 'freeform') {
+      return (_freeformCtrls[_current]?.text.trim().isNotEmpty ?? false);
+    }
+    return (_selectedChoices[_current]?.isNotEmpty ?? false);
+  }
+
+  void _nextOrSubmit() {
+    if (!_hasAnswered()) return;
+    if (_isLast) {
+      _submitQuiz();
+    } else {
+      setState(() => _current++);
+    }
+  }
+
+  Future<void> _submitQuiz() async {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    int correctCount = 0;
-    final answerList = <Map<String, dynamic>>[];
+    int correctCount = 0, scorable = 0;
+    final answers = <Map<String, dynamic>>[];
 
     for (int i = 0; i < widget.questions.length; i++) {
       final q = widget.questions[i] as Map<String, dynamic>;
-      final correct = q['correctAnswer'];
-      final selected = _selectedAnswers[i] ?? '';
-      final isCorrect = selected == correct;
-      if (isCorrect) correctCount++;
+      final type = q['type'] as String? ?? 'multiple';
+      final correctAns = q['correctAnswer'] as String? ?? '';
+      String selected;
 
-      answerList.add({
+      if (type == 'freeform') {
+        selected = _freeformCtrls[i]!.text.trim();
+      } else {
+        selected = _selectedChoices[i] ?? '';
+        scorable++;
+        if (selected == correctAns) correctCount++;
+      }
+
+      answers.add({
         'question': q['question'],
+        'type': type,
         'selectedAnswer': selected,
-        'correctAnswer': correct,
-        'isCorrect': isCorrect,
+        'correctAnswer': correctAns,
+        'isCorrect': type == 'freeform' ? null : selected == correctAns,
       });
     }
 
@@ -59,7 +107,7 @@ class _QuizMultiplePageState extends State<QuizMultiplePage> {
     await FirebaseFirestore.instance.collection('submissions').add({
       'studentId': user.uid,
       'quizId': widget.quizId,
-      'answers': answerList,
+      'answers': answers,
       'score': score,
       'submittedAt': Timestamp.now(),
     });
@@ -81,8 +129,9 @@ class _QuizMultiplePageState extends State<QuizMultiplePage> {
 
   @override
   Widget build(BuildContext context) {
-    final question = widget.questions[_currentQuestion] as Map<String, dynamic>;
-    final selected = _selectedAnswers[_currentQuestion];
+    final q = widget.questions[_current] as Map<String, dynamic>;
+    final type = q['type'] as String? ?? 'multiple';
+    final selected = _selectedChoices[_current];
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -92,7 +141,7 @@ class _QuizMultiplePageState extends State<QuizMultiplePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
+              // ─────────── HEADER ─────────────────────
               Row(
                 children: [
                   Text(
@@ -101,7 +150,7 @@ class _QuizMultiplePageState extends State<QuizMultiplePage> {
                   ),
                   const Spacer(),
                   Text(
-                    'Question ${_currentQuestion + 1} / ${widget.questions.length}',
+                    'Question ${_current + 1} / ${widget.questions.length}',
                     style: subtitleStyle(
                       textColor: Colors.black54,
                       fontSize: 16,
@@ -110,10 +159,11 @@ class _QuizMultiplePageState extends State<QuizMultiplePage> {
                 ],
               ),
               const Divider(),
-
               const SizedBox(height: 24),
+
+              // ─────────── QUESTION TEXT ──────────────
               Text(
-                question['question'],
+                q['question'],
                 style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -121,74 +171,80 @@ class _QuizMultiplePageState extends State<QuizMultiplePage> {
               ),
               const SizedBox(height: 24),
 
-              // Options
-              ...['A', 'B', 'C', 'D'].map((letter) {
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color:
-                          selected == letter
-                              ? Color(primaryColor)
-                              : Colors.grey.shade300,
-                      width: 2,
+              // ─────────── MULTIPLE CHOICE ────────────
+              if (type == 'multiple')
+                ...['A', 'B', 'C', 'D'].map((ltr) {
+                  final txt = (q['choices'] as Map)[ltr] as String? ?? '';
+                  return _buildOption(
+                    label: ltr,
+                    text: txt,
+                    selected: selected == ltr,
+                    onTap:
+                        () => setState(() {
+                          _selectedChoices[_current] = ltr;
+                        }),
+                  );
+                }),
+
+              // ─────────── TRUE / FALSE ──────────────
+              if (type == 'trueFalse') ...[
+                _buildOption(
+                  label: 'A',
+                  text: 'True',
+                  selected: selected == 'A',
+                  onTap:
+                      () => setState(() {
+                        _selectedChoices[_current] = 'A';
+                      }),
+                ),
+                _buildOption(
+                  label: 'B',
+                  text: 'False',
+                  selected: selected == 'B',
+                  onTap:
+                      () => setState(() {
+                        _selectedChoices[_current] = 'B';
+                      }),
+                ),
+              ],
+
+              // ─────────── FREEFORM ───────────────────
+              if (type == 'freeform')
+                TextFormField(
+                  controller: _freeformCtrls[_current],
+                  maxLines: 4,
+                  decoration: InputDecoration(
+                    hintText: 'Write your answer…',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Color(strokeColor)),
                     ),
-                    borderRadius: BorderRadius.circular(12),
+                    contentPadding: const EdgeInsets.all(16),
                   ),
-                  child: ListTile(
-                    title: Text(
-                      question['choices'][letter] ?? '',
-                      style: GoogleFonts.poppins(fontSize: 16),
-                    ),
-                    leading: Radio<String>(
-                      value: letter,
-                      groupValue: selected,
-                      onChanged: (value) {
-                        setState(
-                          () => _selectedAnswers[_currentQuestion] = value!,
-                        );
-                      },
-                      activeColor: Color(primaryColor),
-                    ),
-                  ),
-                );
-              }),
+                ),
 
               const Spacer(),
 
+              // ─────────── NAVIGATION ────────────────
               Row(
                 children: [
-                  if (_currentQuestion > 0)
+                  if (_current > 0)
                     OutlinedButton(
-                      onPressed: () {
-                        setState(() => _currentQuestion--);
-                      },
+                      onPressed: () => setState(() => _current--),
                       child: const Text('Back'),
                     ),
                   const Spacer(),
                   ElevatedButton(
-                    onPressed:
-                        selected == null
-                            ? null
-                            : () {
-                              if (_currentQuestion <
-                                  widget.questions.length - 1) {
-                                setState(() => _currentQuestion++);
-                              } else {
-                                _submitQuiz();
-                              }
-                            },
+                    onPressed: _hasAnswered() ? _nextOrSubmit : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(primaryColor),
+                      backgroundColor: const Color(primaryColor),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
                         vertical: 12,
                       ),
                     ),
                     child: Text(
-                      _currentQuestion < widget.questions.length - 1
-                          ? 'Next'
-                          : 'Submit',
+                      _isLast ? 'Submit' : 'Next',
                       style: const TextStyle(color: Colors.black),
                     ),
                   ),
@@ -201,22 +257,49 @@ class _QuizMultiplePageState extends State<QuizMultiplePage> {
     );
   }
 
-  TextStyle titleStyle({required Color textColor, required double? fontSize}) {
-    return GoogleFonts.poppins(
+  Widget _buildOption({
+    required String label,
+    required String text,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: selected ? const Color(primaryColor) : Colors.grey.shade300,
+          width: 2,
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ListTile(
+        onTap: onTap,
+        leading: Radio<String>(
+          value: label,
+          groupValue: selected ? label : null,
+          onChanged: (_) => onTap(),
+          activeColor: const Color(primaryColor),
+        ),
+        title: Text(text, style: GoogleFonts.poppins(fontSize: 16)),
+      ),
+    );
+  }
+}
+
+// ─────────── TEXT STYLES ───────────────────────
+
+TextStyle titleStyle({required Color textColor, required double? fontSize}) =>
+    GoogleFonts.poppins(
       textStyle: TextStyle(
         fontSize: fontSize,
         fontWeight: FontWeight.bold,
         color: textColor,
       ),
     );
-  }
 
-  TextStyle subtitleStyle({
-    required Color textColor,
-    required double? fontSize,
-  }) {
-    return GoogleFonts.poppins(
-      textStyle: TextStyle(fontSize: fontSize, color: textColor),
-    );
-  }
-}
+TextStyle subtitleStyle({
+  required Color textColor,
+  required double? fontSize,
+}) => GoogleFonts.poppins(
+  textStyle: TextStyle(fontSize: fontSize, color: textColor),
+);
