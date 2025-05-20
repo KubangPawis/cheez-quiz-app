@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'login_student.dart'; // ← Make sure you import your pages
+import 'login_student.dart';
 import 'login_teacher.dart';
 
 const primaryColor = 0xFFFFCC00;
