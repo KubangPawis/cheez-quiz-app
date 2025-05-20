@@ -65,14 +65,19 @@ class CheezQuizApp extends StatelessWidget {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
             builder:
-                (context) =>
-                    StudentResultGoodPage(quizScore: args['quizScore']),
+                (context) => StudentResultGoodPage(
+                  quizScore: args['quizScore'],
+                  itemCount: args['itemCount'],
+                ),
           );
         } else if (settings.name == '/quiz_result_fail') {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
             builder:
-                (context) => StudentResultBadPage(quizScore: args['quizScore']),
+                (context) => StudentResultBadPage(
+                  quizScore: args['quizScore'],
+                  itemCount: args['itemCount'],
+                ),
           );
         } else if (settings.name == '/quiz_multiple') {
           final args = settings.arguments as Map<String, dynamic>;

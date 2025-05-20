@@ -89,10 +89,12 @@ class _QuizPageState extends State<QuizPage> {
             (_) =>
                 scorePercent >= 60
                     ? StudentResultGoodPage(
-                      quizScore: scorePercent.toStringAsFixed(1),
+                      quizScore: correct,
+                      itemCount: widget.questions.length,
                     )
                     : StudentResultBadPage(
-                      quizScore: scorePercent.toStringAsFixed(1),
+                      quizScore: correct,
+                      itemCount: widget.questions.length,
                     ),
       ),
     );
