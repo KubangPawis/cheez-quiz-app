@@ -5,8 +5,6 @@ import '../services/firestore_service.dart';
 const primaryColor = 0xFFFFCC00;
 const strokeColor = 0xFF6C6C6C;
 
-enum QuestionType { multiple, trueFalse, freeform }
-
 class TeacherQuestionPage extends StatefulWidget {
   final String quizTitle;
   final String quizId;
@@ -30,8 +28,6 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
       _choiceB,
       _choiceC,
       _choiceD;
-
-  QuestionType _type = QuestionType.multiple;
   String _selectedCorrect = 'A';
   int _currentIndex = 1;
 
@@ -56,53 +52,35 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
   }
 
   Future<void> _saveAndContinue() async {
-  if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) return;
 
-  final question = _questionCtrl.text.trim();
-  Map<String, String> choices;
-  String correct;
+    final question = _questionCtrl.text.trim();
+    final choices = {
+      'A': _choiceA.text.trim(),
+      'B': _choiceB.text.trim(),
+      'C': _choiceC.text.trim(),
+      'D': _choiceD.text.trim(),
+    };
+    final correct = _selectedCorrect;
 
-  switch (_type) {
-    case QuestionType.multiple:
-      choices = {
-        'A': _choiceA.text.trim(),
-        'B': _choiceB.text.trim(),
-        'C': _choiceC.text.trim(),
-        'D': _choiceD.text.trim(),
-      };
-      correct = _selectedCorrect;
-      break;
-    case QuestionType.trueFalse:
-      choices = {'A': 'True', 'B': 'False'};
-      correct = _selectedCorrect;
-      break;
-    case QuestionType.freeform:
-      choices = {};
-      correct = '';
-      break;
+    await _firestore.addQuestion(
+      quizId: widget.quizId,
+      question: question,
+      choices: choices,
+      correctAnswer: correct,
+      type: 'multiple', // always multiple
+    );
+
+    setState(() {
+      _currentIndex++;
+      _questionCtrl.clear();
+      _choiceA.clear();
+      _choiceB.clear();
+      _choiceC.clear();
+      _choiceD.clear();
+      _selectedCorrect = 'A';
+    });
   }
-
-  // pass type.name ("multiple", "trueFalse", or "freeform") to your service:
-  await _firestore.addQuestion(
-    quizId: widget.quizId,
-    question: question,
-    choices: choices,
-    correctAnswer: correct,
-    type: _type.name,
-  );
-
-  setState(() {
-    _currentIndex++;
-    _questionCtrl.clear();
-    _choiceA.clear();
-    _choiceB.clear();
-    _choiceC.clear();
-    _choiceD.clear();
-    _selectedCorrect = 'A';
-    _type = QuestionType.multiple;
-  });
-}
-
 
   void _finishQuiz() {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -111,40 +89,27 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
     Navigator.of(context).pop();
   }
 
-  Widget choiceField(String letter, TextEditingController ctrl, String hint) {
+  Widget _choiceField(String letter, TextEditingController ctrl, String hint) {
     return Expanded(
       child: TextFormField(
         controller: ctrl,
         decoration: InputDecoration(
           hintText: hint,
-          prefix: Text('$letter  ',
-              style: titleStyle(textColor: Colors.black, fontSize: 16)),
+          prefix: Text('$letter  ', style: titleStyle(textColor: Colors.black, fontSize: 16)),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: const BorderSide(color: Color(strokeColor)),
           ),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         ),
-        validator: (v) {
-          if (_type == QuestionType.multiple && (v ?? '').isEmpty) {
-            return 'Required';
-          }
-          return null;
-        },
+        validator: (v) => (v ?? '').isEmpty ? 'Required' : null,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    const maxWidth = 900.0, gap = 16.0;
-    final isSel = [
-      _type == QuestionType.multiple,
-      _type == QuestionType.trueFalse,
-      _type == QuestionType.freeform,
-    ];
-
+    const double maxWidth = 900, gap = 16;
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -162,57 +127,26 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text('CheezQuiz',
-                            style: titleStyle(
-                                textColor: const Color(primaryColor),
-                                fontSize: 32)),
+                          style: titleStyle(textColor: const Color(primaryColor), fontSize: 32)
+                        ),
                         const SizedBox(width: 8),
-                        Image.asset('assets/cheese-icon.png',
-                            width: 32, height: 32),
+                        Image.asset('assets/cheese-icon.png', width: 32, height: 32),
                       ],
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Center(
-                      child: Text('TEACHER',
-                          style: titleStyle(
-                              textColor: Colors.black, fontSize: 16))),
+                  Center(child: Text('TEACHER', style: titleStyle(textColor: Colors.black, fontSize: 16))),
                   const SizedBox(height: 32),
 
                   // QUESTION NUMBER
                   Text('Question $_currentIndex',
-                      style: titleStyle(
-                          textColor: Colors.black, fontSize: 24)),
+                    style: titleStyle(textColor: Colors.black, fontSize: 24)
+                  ),
                   const SizedBox(height: 4),
                   Text('Fill up the following fields.',
-                      style: subtitleStyle(
-                          textColor: Colors.black, fontSize: 16)),
-                  const SizedBox(height: 16),
-
-                  // TYPE TOGGLE
-                  ToggleButtons(
-                    isSelected: isSel,
-                    onPressed: (i) => setState(() {
-                      _type = QuestionType.values[i];
-                      _selectedCorrect = 'A';
-                    }),
-                    borderColor: const Color(strokeColor),
-                    selectedBorderColor: const Color(primaryColor),
-                    fillColor:
-                        const Color(primaryColor).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    children: const [
-                      Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12),
-                          child: Text('Multiple')),
-                      Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12),
-                          child: Text('True/False')),
-                      Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12),
-                          child: Text('Freeform')),
-                    ],
+                    style: subtitleStyle(textColor: Colors.black, fontSize: 16)
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
                   // QUESTION BOX
                   Form(
@@ -224,81 +158,47 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
                         hintText: 'Write your question…',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide:
-                              const BorderSide(color: Color(strokeColor)),
+                          borderSide: const BorderSide(color: Color(strokeColor)),
                         ),
                         contentPadding: const EdgeInsets.all(16),
                       ),
-                      validator: (v) => (v ?? '').isEmpty
-                          ? 'Please enter a question'
-                          : null,
+                      validator: (v) => (v ?? '').isEmpty ? 'Please enter a question' : null,
                     ),
                   ),
 
-                  // MULTIPLE CHOICE
-                  if (_type == QuestionType.multiple) ...[
-                    const SizedBox(height: 24),
-                    Text('Choices:',
-                        style: titleStyle(
-                            textColor: Colors.black, fontSize: 18)),
-                    const SizedBox(height: 12),
-                    Row(children: [
-                      choiceField('A.', _choiceA, 'Write Choice A'),
-                      SizedBox(width: gap),
-                      choiceField('C.', _choiceC, 'Write Choice C'),
-                    ]),
-                    const SizedBox(height: 12),
-                    Row(children: [
-                      choiceField('B.', _choiceB, 'Write Choice B'),
-                      SizedBox(width: gap),
-                      choiceField('D.', _choiceD, 'Write Choice D'),
-                    ]),
-                    const SizedBox(height: 24),
-                    Text('Select correct answer:',
-                        style: titleStyle(
-                            textColor: Colors.black, fontSize: 18)),
-                    const SizedBox(height: 8),
-                    Row(children: ['A', 'B', 'C', 'D'].map((l) {
-                      return Row(
-                        children: [
-                          Radio<String>(
-                            value: l,
-                            groupValue: _selectedCorrect,
-                            onChanged: (v) =>
-                                setState(() => _selectedCorrect = v!),
-                          ),
-                          Text('Choice $l'),
-                          const SizedBox(width: 16),
-                        ],
-                      );
-                    }).toList()),
-                  ],
+                  // CHOICES
+                  const SizedBox(height: 24),
+                  Text('Choices:', style: titleStyle(textColor: Colors.black, fontSize: 18)),
+                  const SizedBox(height: 12),
+                  Row(children: [
+                    _choiceField('A.', _choiceA, 'Write Choice A'),
+                    SizedBox(width: gap),
+                    _choiceField('C.', _choiceC, 'Write Choice C'),
+                  ]),
+                  const SizedBox(height: 12),
+                  Row(children: [
+                    _choiceField('B.', _choiceB, 'Write Choice B'),
+                    SizedBox(width: gap),
+                    _choiceField('D.', _choiceD, 'Write Choice D'),
+                  ]),
 
-                  // TRUE / FALSE
-                  if (_type == QuestionType.trueFalse) ...[
-                    const SizedBox(height: 24),
-                    Text('Select correct answer:',
-                        style: titleStyle(
-                            textColor: Colors.black, fontSize: 18)),
-                    const SizedBox(height: 8),
-                    Row(children: [
-                      Radio<String>(
-                        value: 'A',
-                        groupValue: _selectedCorrect,
-                        onChanged: (v) =>
-                            setState(() => _selectedCorrect = v!),
-                      ),
-                      const Text('True'),
-                      const SizedBox(width: 32),
-                      Radio<String>(
-                        value: 'B',
-                        groupValue: _selectedCorrect,
-                        onChanged: (v) =>
-                            setState(() => _selectedCorrect = v!),
-                      ),
-                      const Text('False'),
-                    ]),
-                  ],
+                  // CORRECT ANSWER
+                  const SizedBox(height: 24),
+                  Text('Select correct answer:', style: titleStyle(textColor: Colors.black, fontSize: 18)),
+                  const SizedBox(height: 8),
+                  Row(children: ['A', 'B', 'C', 'D'].map((l) {
+                    return Row(
+                      children: [
+                        Radio<String>(
+                          value: l,
+                          groupValue: _selectedCorrect,
+                          onChanged: (v) => setState(() => _selectedCorrect = v!),
+                        ),
+                        Text(l),
+                        const SizedBox(width: 16),
+                      ],
+                    );
+                  }).toList()),
 
                   const Spacer(),
 
@@ -308,10 +208,8 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
                       Expanded(
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                const Color(primaryColor),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
+                            backgroundColor: const Color(primaryColor),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                           onPressed: _saveAndContinue,
                           child: const Text('Add Question'),
@@ -321,10 +219,8 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
                       Expanded(
                         child: OutlinedButton(
                           style: OutlinedButton.styleFrom(
-                            side: const BorderSide(
-                                color: Color(strokeColor)),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
+                            side: const BorderSide(color: Color(strokeColor)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                           onPressed: _finishQuiz,
                           child: const Text('Finish Quiz'),
@@ -344,17 +240,12 @@ class _TeacherQuestionPageState extends State<TeacherQuestionPage> {
 
 // TEXT STYLES
 
-TextStyle titleStyle(
-        {required Color textColor, required double? fontSize}) =>
+TextStyle titleStyle({required Color textColor, required double? fontSize}) =>
     GoogleFonts.poppins(
-      textStyle: TextStyle(
-          fontSize: fontSize,
-          fontWeight: FontWeight.bold,
-          color: textColor),
+      textStyle: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold, color: textColor),
     );
 
-TextStyle subtitleStyle(
-        {required Color textColor, required double? fontSize}) =>
+TextStyle subtitleStyle({required Color textColor, required double? fontSize}) =>
     GoogleFonts.poppins(
       textStyle: TextStyle(fontSize: fontSize, color: textColor),
     );
