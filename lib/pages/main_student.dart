@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cheez_quiz_app/pages/quiz_multiple.dart';
-import 'package:cheez_quiz_app/pages/quiz_freeform_page.dart';
 import 'package:cheez_quiz_app/pages/quiz_review_page.dart';
 
 const primaryColor = 0xFFFFCC00;
@@ -31,14 +30,19 @@ class _StudentMainPageState extends State<StudentMainPage> {
     Navigator.of(context).pushReplacementNamed('/login_student');
   }
 
-  Future<void> _openQuiz(BuildContext context, Map<String, dynamic> quizData, String quizId) async {
+  Future<void> _openQuiz(
+    BuildContext context,
+    Map<String, dynamic> quizData,
+    String quizId,
+  ) async {
     // 1) fetch questions
-    final qSnap = await FirebaseFirestore.instance
-        .collection('quizzes')
-        .doc(quizId)
-        .collection('questions')
-        .get();
-    final questions = qSnap.docs.map((d) => d.data()..['id']=d.id).toList();
+    final qSnap =
+        await FirebaseFirestore.instance
+            .collection('quizzes')
+            .doc(quizId)
+            .collection('questions')
+            .get();
+    final questions = qSnap.docs.map((d) => d.data()..['id'] = d.id).toList();
     if (questions.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("This quiz has no questions yet.")),
@@ -47,12 +51,13 @@ class _StudentMainPageState extends State<StudentMainPage> {
     }
 
     // 2) see if they've already submitted
-    final subSnap = await FirebaseFirestore.instance
-        .collection('submissions')
-        .where('studentId', isEqualTo: _user.uid)
-        .where('quizId', isEqualTo: quizId)
-        .limit(1)
-        .get();
+    final subSnap =
+        await FirebaseFirestore.instance
+            .collection('submissions')
+            .where('studentId', isEqualTo: _user.uid)
+            .where('quizId', isEqualTo: quizId)
+            .limit(1)
+            .get();
 
     if (subSnap.docs.isNotEmpty) {
       // REVIEW mode
@@ -60,31 +65,23 @@ class _StudentMainPageState extends State<StudentMainPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => QuizReviewPage(
-            quizTitle: quizData['title'] ?? 'Quiz',
-            questions: questions,
-            submission: submission,
-          ),
+          builder:
+              (_) => QuizReviewPage(
+                quizTitle: quizData['title'] ?? 'Quiz',
+                questions: questions,
+                submission: submission,
+              ),
         ),
       );
     } else {
-      // TAKE QUIZ mode
-      final isFreeform = questions.any((q) => q['type']=='freeform');
-      Navigator.push(
+      Navigator.pushNamed(
         context,
-        MaterialPageRoute(
-          builder: (_) => isFreeform
-              ? QuizFreeformPage(
-                  quizId: quizId,
-                  quizTitle: quizData['title'],
-                  questions: questions,
-                )
-              : QuizPage(
-                  quizId: quizId,
-                  quizTitle: quizData['title'],
-                  questions: questions,
-                ),
-        ),
+        '/quiz_multiple',
+        arguments: {
+          'quizId': quizId,
+          'quizTitle': quizData['title'] ?? 'Quiz',
+          'questions': questions,
+        },
       );
     }
   }
@@ -103,14 +100,23 @@ class _StudentMainPageState extends State<StudentMainPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const SizedBox(width:48),
+                  const SizedBox(width: 48),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('CheezQuiz',
-                          style: titleStyle(textColor: Color(primaryColor), fontSize: 32)),
-                      const SizedBox(width:8),
-                      Image.asset('assets/cheese-icon.png', width:32, height:32),
+                      Text(
+                        'CheezQuiz',
+                        style: titleStyle(
+                          textColor: Color(primaryColor),
+                          fontSize: 32,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Image.asset(
+                        'assets/cheese-icon.png',
+                        width: 32,
+                        height: 32,
+                      ),
                     ],
                   ),
                   IconButton(
@@ -120,76 +126,113 @@ class _StudentMainPageState extends State<StudentMainPage> {
                 ],
               ),
 
-              const SizedBox(height:4),
-              Center(child: Text('STUDENT', style: titleStyle(textColor: Colors.black, fontSize:16))),
-              const SizedBox(height:32),
-              Text('Hi, ${_user.email}', style: titleStyle(textColor: Colors.black, fontSize:24)),
-              const SizedBox(height:4),
-              const Text('Select a quiz to begin.', style: TextStyle(fontSize:16, color:Colors.black87)),
-              const SizedBox(height:24),
+              const SizedBox(height: 4),
+              Center(
+                child: Text(
+                  'STUDENT',
+                  style: titleStyle(textColor: Colors.black, fontSize: 16),
+                ),
+              ),
+              const SizedBox(height: 32),
+              Text(
+                'Hi, ${_user.email}',
+                style: titleStyle(textColor: Colors.black, fontSize: 24),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Select a quiz to begin.',
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+              const SizedBox(height: 24),
 
               // QUIZ LIST
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance.collection('quizzes').snapshots(),
-                  builder: (c,snap) {
-                    if (snap.connectionState==ConnectionState.waiting) {
-                      return const Center(child:CircularProgressIndicator());
+                  stream:
+                      FirebaseFirestore.instance
+                          .collection('quizzes')
+                          .snapshots(),
+                  builder: (c, snap) {
+                    if (snap.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
                     }
                     final docs = snap.data?.docs ?? [];
                     if (docs.isEmpty) {
-                      return const Center(child:Text('No quizzes available.'));
+                      return const Center(child: Text('No quizzes available.'));
                     }
                     return ListView.separated(
                       itemCount: docs.length,
-                      separatorBuilder: (_,__)=> const SizedBox(height:12),
-                      itemBuilder: (ctx,i) {
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (ctx, i) {
                         final data = docs[i].data() as Map<String, dynamic>;
                         final quizId = docs[i].id;
                         return FutureBuilder<QuerySnapshot>(
-                          future: FirebaseFirestore.instance
-                              .collection('quizzes')
-                              .doc(quizId)
-                              .collection('questions')
-                              .get(),
-                          builder: (c2,s2) {
+                          future:
+                              FirebaseFirestore.instance
+                                  .collection('quizzes')
+                                  .doc(quizId)
+                                  .collection('questions')
+                                  .get(),
+                          builder: (c2, s2) {
                             final count = s2.data?.docs.length ?? 0;
                             return GestureDetector(
-                              onTap: ()=> _openQuiz(context, data, quizId),
+                              onTap: () => _openQuiz(context, data, quizId),
                               child: Container(
-                                height:100,
+                                height: 100,
                                 decoration: BoxDecoration(
-                                  border:Border.all(color:Color(strokeColor)),
+                                  border: Border.all(color: Color(strokeColor)),
                                   borderRadius: BorderRadius.circular(12),
                                   image: const DecorationImage(
                                     image: AssetImage('assets/algebra-bg.png'),
-                                    fit:BoxFit.cover,
-                                    colorFilter: ColorFilter.mode(Colors.black38, BlendMode.darken),
+                                    fit: BoxFit.cover,
+                                    colorFilter: ColorFilter.mode(
+                                      Colors.black38,
+                                      BlendMode.darken,
+                                    ),
                                   ),
                                 ),
-                                padding: const EdgeInsets.symmetric(horizontal:16,vertical:12),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children:[
-                                        Text(data['title'] ?? 'Quiz',
-                                            style: titleStyle(textColor:Colors.white,fontSize:18)),
-                                        const SizedBox(height:4),
-                                        Text('$count Questions',
-                                            style: subtitleStyle(textColor:Colors.white70,fontSize:14)),
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          data['title'] ?? 'Quiz',
+                                          style: titleStyle(
+                                            textColor: Colors.white,
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '$count Questions',
+                                          style: subtitleStyle(
+                                            textColor: Colors.white70,
+                                            fontSize: 14,
+                                          ),
+                                        ),
                                       ],
                                     ),
-                                    const Icon(Icons.chevron_right, color:Colors.white),
+                                    const Icon(
+                                      Icons.chevron_right,
+                                      color: Colors.white,
+                                    ),
                                   ],
                                 ),
                               ),
                             );
                           },
                         );
-                      }
+                      },
                     );
                   },
                 ),
@@ -204,10 +247,16 @@ class _StudentMainPageState extends State<StudentMainPage> {
 
 // keep your styles...
 TextStyle titleStyle({required Color textColor, required double? fontSize}) =>
-  GoogleFonts.poppins(
-    textStyle: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold, color:textColor),
-  );
-TextStyle subtitleStyle({required Color textColor, required double? fontSize}) =>
-  GoogleFonts.poppins(
-    textStyle: TextStyle(fontSize: fontSize, color:textColor),
-  );
+    GoogleFonts.poppins(
+      textStyle: TextStyle(
+        fontSize: fontSize,
+        fontWeight: FontWeight.bold,
+        color: textColor,
+      ),
+    );
+TextStyle subtitleStyle({
+  required Color textColor,
+  required double? fontSize,
+}) => GoogleFonts.poppins(
+  textStyle: TextStyle(fontSize: fontSize, color: textColor),
+);

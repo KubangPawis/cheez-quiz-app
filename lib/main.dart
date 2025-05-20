@@ -10,7 +10,6 @@ import 'package:cheez_quiz_app/pages/result_bad_student.dart';
 import 'package:cheez_quiz_app/pages/result_good_student.dart';
 import 'package:cheez_quiz_app/pages/quiz_success_page.dart';
 import 'package:cheez_quiz_app/pages/create_quiz_page.dart';
-import 'package:cheez_quiz_app/pages/quiz_freeform_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -70,6 +69,16 @@ class CheezQuizApp extends StatelessWidget {
           return MaterialPageRoute(
             builder:
                 (context) => StudentResultBadPage(quizScore: args['quizScore']),
+          );
+        } else if (settings.name == '/quiz_multiple') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder:
+                (context) => QuizPage(
+                  quizId: args['quizId'],
+                  quizTitle: args['quizTitle'],
+                  questions: args['questions'],
+                ),
           );
         }
         return null;
