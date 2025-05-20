@@ -21,6 +21,13 @@ class TeacherMainPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Color(primaryColor),
+        child: Icon(Icons.add, color: Colors.black, size: 36),
+        onPressed: () {
+          Navigator.pushNamed(context, '/create_quiz');
+        },
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -129,14 +136,6 @@ class TeacherMainPage extends StatelessWidget {
                     );
                   },
                 ),
-              ),
-
-              const SizedBox(height: 16),
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, '/create_quiz');
-                },
-                child: const AddQuizCard(),
               ),
             ],
           ),
