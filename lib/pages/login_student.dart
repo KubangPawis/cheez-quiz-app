@@ -62,8 +62,17 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
                 children: [
                   // Header
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
+                      IconButton(
+                        icon: Icon(Icons.arrow_back_rounded),
+                        iconSize: 64,
+                        color: Colors.black,
+                        onPressed: () {
+                          Navigator.pushReplacementNamed(context, '/home');
+                        },
+                      ),
+                      SizedBox(width: 36),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
