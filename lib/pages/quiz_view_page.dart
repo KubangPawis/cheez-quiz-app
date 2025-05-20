@@ -11,11 +11,8 @@ class QuizViewPage extends StatelessWidget {
   final String quizId;
   final String quizTitle;
 
-  const QuizViewPage({
-    Key? key,
-    required this.quizId,
-    required this.quizTitle,
-  }) : super(key: key);
+  const QuizViewPage({Key? key, required this.quizId, required this.quizTitle})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -41,14 +38,10 @@ class QuizViewPage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () {
-              Navigator.pushReplacement(
+              Navigator.pushReplacementNamed(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => TeacherQuestionPage(
-                    quizId: quizId,
-                    quizTitle: quizTitle,
-                  ),
-                ),
+                '/quiz_creation',
+                arguments: {'quizId': quizId, 'quizTitle': quizTitle},
               );
             },
           ),
@@ -57,9 +50,9 @@ class QuizViewPage extends StatelessWidget {
             onPressed: () async {
               await FirestoreService().deleteQuiz(quizId);
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Quiz deleted')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Quiz deleted')));
             },
           ),
         ],
@@ -117,12 +110,14 @@ class QuizViewPage extends StatelessWidget {
                             '$letter. ${choices[letter]}',
                             style: TextStyle(
                               fontSize: 14,
-                              color: letter == correct
-                                  ? Colors.green
-                                  : Colors.black87,
-                              fontWeight: letter == correct
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
+                              color:
+                                  letter == correct
+                                      ? Colors.green
+                                      : Colors.black87,
+                              fontWeight:
+                                  letter == correct
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
                             ),
                           ),
                         );

@@ -5,6 +5,7 @@ import 'package:cheez_quiz_app/pages/login_teacher.dart';
 import 'package:cheez_quiz_app/pages/main_student.dart';
 import 'package:cheez_quiz_app/pages/main_teacher.dart';
 import 'package:cheez_quiz_app/pages/quiz_multiple.dart';
+import 'package:cheez_quiz_app/pages/quiz_view_page.dart';
 import 'package:cheez_quiz_app/pages/result_bad_student.dart';
 import 'package:cheez_quiz_app/pages/result_good_student.dart';
 import 'package:cheez_quiz_app/pages/quiz_success_page.dart';
@@ -16,9 +17,7 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(CheezQuizApp());
 }
 
@@ -41,6 +40,28 @@ class CheezQuizApp extends StatelessWidget {
         '/result_bad_student': (context) => const StudentResultBadPage(),
         '/quiz_success': (context) => const QuizSuccessPage(),
         '/create_quiz': (context) => const CreateQuizPage(),
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/quiz_view') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder:
+                (context) => QuizViewPage(
+                  quizId: args['quizId'],
+                  quizTitle: args['quizTitle'],
+                ),
+          );
+        } else if (settings.name == '/quiz_creation') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder:
+                (context) => TeacherQuestionPage(
+                  quizId: args['quizId'],
+                  quizTitle: args['quizTitle'],
+                ),
+          );
+        }
+        return null;
       },
     );
   }
