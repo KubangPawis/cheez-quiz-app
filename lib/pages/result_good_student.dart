@@ -7,7 +7,8 @@ const goodJobColor = 0xFF4CD861;
 const badJobColor = 0xFFFF4931;
 
 class StudentResultGoodPage extends StatelessWidget {
-  const StudentResultGoodPage({super.key});
+  final String quizScore;
+  const StudentResultGoodPage({super.key, required this.quizScore});
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +80,7 @@ class StudentResultGoodPage extends StatelessWidget {
         ),
         SizedBox(height: 8),
         Text(
-          'Score: 5/5',
+          'Score: $quizScore/5',
           style: titleStyle(textColor: Colors.black, fontSize: 32),
         ),
         SizedBox(height: 20),

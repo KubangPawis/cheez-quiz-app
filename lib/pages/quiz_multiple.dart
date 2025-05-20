@@ -53,7 +53,8 @@ class _QuizMultiplePageState extends State<QuizMultiplePage> {
       });
     }
 
-    final score = (correctCount / widget.questions.length) * 100;
+    final score = correctCount;
+    final scorePercentage = correctCount / widget.questions.length;
 
     await FirebaseFirestore.instance.collection('submissions').add({
       'studentId': user.uid,
@@ -63,13 +64,19 @@ class _QuizMultiplePageState extends State<QuizMultiplePage> {
       'submittedAt': Timestamp.now(),
     });
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) =>
-            score >= 60 ? const StudentResultGoodPage() : const StudentResultBadPage(),
-      ),
-    );
+    if (scorePercentage > 0.5) {
+      Navigator.pushReplacementNamed(
+        context,
+        '/quiz_result_success',
+        arguments: {'quizScore': score.toString()},
+      );
+    } else {
+      Navigator.pushReplacementNamed(
+        context,
+        '/quiz_result_fail',
+        arguments: {'quizScore': score.toString()},
+      );
+    }
   }
 
   @override
@@ -95,7 +102,10 @@ class _QuizMultiplePageState extends State<QuizMultiplePage> {
                   const Spacer(),
                   Text(
                     'Question ${_currentQuestion + 1} / ${widget.questions.length}',
-                    style: subtitleStyle(textColor: Colors.black54, fontSize: 16),
+                    style: subtitleStyle(
+                      textColor: Colors.black54,
+                      fontSize: 16,
+                    ),
                   ),
                 ],
               ),
@@ -104,7 +114,10 @@ class _QuizMultiplePageState extends State<QuizMultiplePage> {
               const SizedBox(height: 24),
               Text(
                 question['question'],
-                style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600),
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 24),
 
@@ -114,7 +127,10 @@ class _QuizMultiplePageState extends State<QuizMultiplePage> {
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: selected == letter ? Color(primaryColor) : Colors.grey.shade300,
+                      color:
+                          selected == letter
+                              ? Color(primaryColor)
+                              : Colors.grey.shade300,
                       width: 2,
                     ),
                     borderRadius: BorderRadius.circular(12),
@@ -128,7 +144,9 @@ class _QuizMultiplePageState extends State<QuizMultiplePage> {
                       value: letter,
                       groupValue: selected,
                       onChanged: (value) {
-                        setState(() => _selectedAnswers[_currentQuestion] = value!);
+                        setState(
+                          () => _selectedAnswers[_currentQuestion] = value!,
+                        );
                       },
                       activeColor: Color(primaryColor),
                     ),
@@ -149,21 +167,28 @@ class _QuizMultiplePageState extends State<QuizMultiplePage> {
                     ),
                   const Spacer(),
                   ElevatedButton(
-                    onPressed: selected == null
-                        ? null
-                        : () {
-                            if (_currentQuestion < widget.questions.length - 1) {
-                              setState(() => _currentQuestion++);
-                            } else {
-                              _submitQuiz();
-                            }
-                          },
+                    onPressed:
+                        selected == null
+                            ? null
+                            : () {
+                              if (_currentQuestion <
+                                  widget.questions.length - 1) {
+                                setState(() => _currentQuestion++);
+                              } else {
+                                _submitQuiz();
+                              }
+                            },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(primaryColor),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                     ),
                     child: Text(
-                      _currentQuestion < widget.questions.length - 1 ? 'Next' : 'Submit',
+                      _currentQuestion < widget.questions.length - 1
+                          ? 'Next'
+                          : 'Submit',
                       style: const TextStyle(color: Colors.black),
                     ),
                   ),
@@ -186,12 +211,12 @@ class _QuizMultiplePageState extends State<QuizMultiplePage> {
     );
   }
 
-  TextStyle subtitleStyle({required Color textColor, required double? fontSize}) {
+  TextStyle subtitleStyle({
+    required Color textColor,
+    required double? fontSize,
+  }) {
     return GoogleFonts.poppins(
-      textStyle: TextStyle(
-        fontSize: fontSize,
-        color: textColor,
-      ),
+      textStyle: TextStyle(fontSize: fontSize, color: textColor),
     );
   }
 }

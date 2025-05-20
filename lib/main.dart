@@ -36,8 +36,6 @@ class CheezQuizApp extends StatelessWidget {
         '/login_student': (context) => const StudentLoginPage(),
         '/main_teacher': (context) => const TeacherMainPage(),
         '/main_student': (context) => const StudentMainPage(),
-        '/result_good_student': (context) => const StudentResultGoodPage(),
-        '/result_bad_student': (context) => const StudentResultBadPage(),
         '/quiz_success': (context) => const QuizSuccessPage(),
         '/create_quiz': (context) => const CreateQuizPage(),
       },
@@ -59,6 +57,19 @@ class CheezQuizApp extends StatelessWidget {
                   quizId: args['quizId'],
                   quizTitle: args['quizTitle'],
                 ),
+          );
+        } else if (settings.name == '/quiz_result_success') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder:
+                (context) =>
+                    StudentResultGoodPage(quizScore: args['quizScore']),
+          );
+        } else if (settings.name == '/quiz_result_fail') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder:
+                (context) => StudentResultBadPage(quizScore: args['quizScore']),
           );
         }
         return null;
